@@ -7,7 +7,6 @@ import org.junit.Test;
 import io.aext.core.base.payload.MessageResponse;
 
 public class MessageResponseTest {
-
 	@Test
 	public void commonTest() {
 		MessageResponse mr1 = new MessageResponse("OK");
