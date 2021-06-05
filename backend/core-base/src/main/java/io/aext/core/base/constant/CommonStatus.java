@@ -1,0 +1,39 @@
+package io.aext.core.base.constant;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import io.aext.core.base.BaseEnum;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * @author rojar
+ *
+ * @date 2021-06-05
+ */
+@AllArgsConstructor
+@Getter
+public enum CommonStatus implements BaseEnum {
+	/**
+	 * Normal
+	 */
+	NORMAL("Normal"),
+	/*
+	 * Can login but can not exchange.
+	 */
+	SUSPICIOUS("Suspicious"),
+	/**
+	 * Can not login
+	 */
+	ILLEGAL("Illegal");
+
+	@Setter
+	private String name;
+
+	@Override
+	@JsonValue
+	public int getOrdinal() {
+		return this.ordinal();
+	}
+}
