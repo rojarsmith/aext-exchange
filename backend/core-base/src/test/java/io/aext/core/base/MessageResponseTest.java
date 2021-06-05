@@ -1,8 +1,8 @@
 package io.aext.core.base;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.aext.core.base.payload.MessageResponse;
 
