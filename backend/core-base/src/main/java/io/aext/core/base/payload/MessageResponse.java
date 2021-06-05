@@ -31,24 +31,4 @@ public class MessageResponse {
 	public String toString() {
 		return JsonHelper.stringify(this);
 	}
-
-	public static MessageResponse success() {
-		return new MessageResponse(0, "SUCCESS");
-	}
-
-	public static MessageResponse success(String msg) {
-		return new MessageResponse(0, msg);
-	}
-
-	public static MessageResponse success(String msg, Object data) {
-		return new MessageResponse(0, msg, data);
-	}
-
-	public static MessageResponse error(int code, String msg) {
-		return new MessageResponse(code, msg);
-	}
-
-	public static MessageResponse error(String msg) {
-		return new MessageResponse(500, msg);
-	}
 }

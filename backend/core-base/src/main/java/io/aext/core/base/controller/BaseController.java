@@ -10,22 +10,26 @@ public class BaseController {
 	private final static Logger logger = LoggerFactory.getLogger(BaseController.class);
 
 	protected MessageResponse success() {
-		return MessageResponse.success();
+		return success("SUCCESS", null);
 	}
 
 	protected MessageResponse success(String msg) {
-		return MessageResponse.success(msg);
+		return success(msg, null);
 	}
 
 	protected MessageResponse success(String msg, Object obj) {
-		return MessageResponse.success(msg, obj);
+		return new MessageResponse(0, msg, obj);
 	}
 
 	protected MessageResponse error(String msg) {
-		return MessageResponse.error(msg);
+		return error(500, msg);
 	}
 
 	protected MessageResponse error(int code, String msg) {
-		return MessageResponse.error(code, msg);
+		return error(code, msg);
+	}
+
+	protected MessageResponse error(int code, String msg, Object obj) {
+		return new MessageResponse(code, msg, obj);
 	}
 }

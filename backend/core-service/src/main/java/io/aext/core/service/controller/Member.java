@@ -1,14 +1,21 @@
 package io.aext.core.service.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.validation.Valid;
 
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.payload.MessageResponse;
+import io.aext.core.base.util.JsonHelper;
 import io.aext.core.service.payload.RegisterByEmail;
 
 /**
@@ -17,19 +24,28 @@ import io.aext.core.service.payload.RegisterByEmail;
  * @date 2021/6/5
  */
 @RestController
-@RequestMapping("member")
 public class Member extends BaseController {
 	/**
-	 * 邮箱注册
-	 *
-	 * @param loginByEmail
-	 * @param bindingResult
-	 * @return
+	 * Register by email.
 	 */
-	@RequestMapping("/register/email")
+	@RequestMapping("/v1/member/register/email")
 	@ResponseBody
 	public MessageResponse registerByEmail(@Valid RegisterByEmail registerByEmail, BindingResult bindingResult)
 			throws Exception {
+		if (bindingResult.hasErrors()) {
+			Map<String, List<Map<String, String>>> data = new HashMap<>();
+			List<Map<String, String>> errors = new ArrayList<>();
+			for (FieldError fieldError : bindingResult.getFieldErrors()) {
+				Map<String, String> error = new HashMap<>();
+				error.put("field", fieldError.getField());
+				error.put("message", fieldError.getDefaultMessage());
+				errors.add(error);
+			}
+			data.put("errors", errors);
+
+			return error(500, "Register failed", data);
+		}
+
 		return null;
 	}
 }
