@@ -14,23 +14,23 @@ import lombok.Data;
  */
 @Data
 public class RegisterByEmail {
-	@NotBlank(message = "{LoginByEmail.email.null}")
-	@Email(message = "{LoginByEmail.email.format}")
+	@NotBlank(message = "{RegisterByEmail.email.null}")
+	@Email(message = "{RegisterByEmail.email.format}")
 	private String email;
 
-	@NotBlank(message = "{LoginByEmail.password.null}")
-	@Length(min = 6, max = 20, message = "{LoginByEmail.password.length}")
+	@NotBlank(message = "{RegisterByEmail.password.null}")
+	@Length(min = 6, max = 20, message = "{RegisterByEmail.password.length}")
 	private String password;
 
-	@NotBlank(message = "{LoginByEmail.username.null}")
-	@Length(min = 3, max = 20, message = "{LoginByEmail.username.length}")
+	@NotBlank(message = "{RegisterByEmail.username.null}")
+	@Length(min = 3, max = 20, message = "{RegisterByEmail.username.length}")
 	private String username;
 
-	@NotBlank(message = "{LoginByEmail.country.null}")
+	@NotBlank(message = "{RegisterByEmail.country.null}")
 	private String country;
 
 	private String promotion;
 
-	@NotBlank(message = "{LoginByEmail.verify.null}")
+	@NotBlank(message = "{RegisterByEmail.verify.null}")
 	private String verify;
 }

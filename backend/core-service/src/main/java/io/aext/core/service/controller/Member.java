@@ -3,10 +3,13 @@ package io.aext.core.service.controller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +28,9 @@ import io.aext.core.service.payload.RegisterByEmail;
  */
 @RestController
 public class Member extends BaseController {
+	@Autowired
+	MessageSource messageSource;
+
 	/**
 	 * Register by email.
 	 */
@@ -42,6 +48,8 @@ public class Member extends BaseController {
 				errors.add(error);
 			}
 			data.put("errors", errors);
+
+			String deb = messageSource.getMessage("RegisterByEmail.email.format", null, new Locale("zh_CN"));
 
 			return error(500, "Register failed", data);
 		}
