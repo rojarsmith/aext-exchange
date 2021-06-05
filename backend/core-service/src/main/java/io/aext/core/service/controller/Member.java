@@ -10,6 +10,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,9 +50,10 @@ public class Member extends BaseController {
 			}
 			data.put("errors", errors);
 
-			String deb = messageSource.getMessage("RegisterByEmail.email.format", null, new Locale("zh_CN"));
+			String meesage = messageSource.getMessage("RegisterByEmail.register.failed", null,
+					LocaleContextHolder.getLocale());
 
-			return error(500, "Register failed", data);
+			return error(500, meesage, data);
 		}
 
 		return null;
