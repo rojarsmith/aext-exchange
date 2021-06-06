@@ -1,7 +1,5 @@
 package io.aext.core.base.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +17,11 @@ public class MemberService extends BaseService<MemberService> {
 	private MemberDao memberDao;
 
 	public boolean isEmailExist(String email) {
-		List<Member> list = memberDao.getAllByEmailEquals(email);
-		return list.size() > 0 ? true : false;
+		return memberDao.getAllByEmailEquals(email).size() > 0 ? true : false;
+	}
+
+	public boolean isUsernameExist(String username) {
+		return memberDao.getAllByUsernameEquals(username).size() > 0 ? true : false;
 	}
 
 	public Member save(Member member) {

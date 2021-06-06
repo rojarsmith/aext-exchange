@@ -35,7 +35,7 @@ public class Member extends BaseController {
 
 	@Autowired
 	MemberService memberService;
-	
+
 	/**
 	 * Register by email.
 	 */
@@ -59,9 +59,13 @@ public class Member extends BaseController {
 
 			return error(500, meesage, data);
 		}
-		String email = registerByEmail.getEmail();
-		isTrue(!memberService.isEmailExist(email), messageSource.getMessage("EMAIL_ALREADY_BOUND", null,LocaleContextHolder.getLocale()));
-
+//		String email = ;
+		isTrue(!memberService.isEmailExist(registerByEmail.getEmail()),
+				messageSource.getMessage("EMAIL_ALREADY_BOUND", null, LocaleContextHolder.getLocale()));
+		isTrue(!memberService.isUsernameExist(registerByEmail.getUsername()),
+				messageSource.getMessage("USERNAME_ALREADY_EXISTS", null, LocaleContextHolder.getLocale()));
+		isTrue(memberService.isUsernameExist(registerByEmail.getUsername()),
+				messageSource.getMessage("USERNAME_ALREADY_EXISTS", null, LocaleContextHolder.getLocale()));
 		return null;
 	}
 }

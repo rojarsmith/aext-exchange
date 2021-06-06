@@ -26,9 +26,6 @@ public class RegisterByEmail {
 	@Length(min = 3, max = 20, message = "{RegisterByEmail.username.length}")
 	private String username;
 
-	@NotBlank(message = "{RegisterByEmail.country.null}")
-	private String country;
-
 	private String promotion;
 
 	@NotBlank(message = "{RegisterByEmail.verify.null}")

@@ -11,4 +11,6 @@ import io.aext.core.base.entity.Member;
  */
 public interface MemberDao extends BaseDao<Member> {
 	List<Member> getAllByEmailEquals(String email);
+	
+	List<Member> getAllByUsernameEquals(String username);
 }
