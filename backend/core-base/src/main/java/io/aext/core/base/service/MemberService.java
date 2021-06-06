@@ -18,6 +18,10 @@ public class MemberService extends BaseService<MemberService> {
 	@Autowired
 	private MemberDao memberDao;
 
+	public Optional<Member> findByUsername(String username) {
+		return memberDao.findByUsername(username);
+	}
+
 	public Optional<Member> findByEmail(String email) {
 		return memberDao.findMemberByEmail(email);
 	}

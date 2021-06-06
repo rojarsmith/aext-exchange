@@ -62,10 +62,8 @@ public class MemberServiceTest {
 		assertThrows(Exception.class, () -> {
 			ms1.isEmailExist("");
 		});
-		
-		
-		 Optional<Member> m3 = memberService.findByEmail("dev@aext.io");
-		 assertEquals(m3.isPresent(), true);
-		 
+
+		Optional<Member> m3 = memberService.findByEmail("dev@aext.io");
+		assertEquals(m3.isPresent(), true);
 	}
 }
