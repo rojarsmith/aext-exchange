@@ -44,7 +44,7 @@ public class SHA2 {
 		return getSHA512(Instant.now().toString()).substring(beginIndex, endIndex);
 	}
 
-	public static String getSHA512VerifyLen6() {
+	public static String getSHA256VerifyLen6() {
 		int v = getSHA256(Instant.now().toString()).hashCode() % 1000000;
 		v = v < 0 ? v * -1 : v;
 		return Integer.toString(v);
