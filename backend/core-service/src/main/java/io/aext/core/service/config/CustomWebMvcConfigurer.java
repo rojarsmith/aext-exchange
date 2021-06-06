@@ -17,7 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class CustomWebMvcConfigurer implements WebMvcConfigurer {
 	@Autowired
 	private MessageSource messageSource;
-
+	
 	@Bean
 	public Validator getValidator() {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();

@@ -3,7 +3,6 @@ package io.aext.core.service.controller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -19,8 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.payload.MessageResponse;
-import io.aext.core.base.util.JsonHelper;
+import io.aext.core.base.service.MemberService;
 import io.aext.core.service.payload.RegisterByEmail;
+
+import static org.springframework.util.Assert.isTrue;
 
 /**
  * @author Rojar Smith
@@ -32,6 +33,9 @@ public class Member extends BaseController {
 	@Autowired
 	MessageSource messageSource;
 
+	@Autowired
+	private MemberService memberService;
+	
 	/**
 	 * Register by email.
 	 */
@@ -55,6 +59,8 @@ public class Member extends BaseController {
 
 			return error(500, meesage, data);
 		}
+		String email = registerByEmail.getEmail();
+		isTrue(!memberService.isEmailExist(email), messageSource.getMessage("EMAIL_ALREADY_BOUND", null,LocaleContextHolder.getLocale()));
 
 		return null;
 	}
