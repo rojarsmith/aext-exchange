@@ -12,6 +12,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  */
 @Component
 public class BaseService<T> extends TopBaseService {
-//    @Autowired
-//    protected JPAQueryFactory queryFactory;
+    @Autowired
+    protected JPAQueryFactory queryFactory;
 }

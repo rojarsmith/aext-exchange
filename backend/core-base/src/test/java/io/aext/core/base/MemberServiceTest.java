@@ -1,11 +1,13 @@
 package io.aext.core.base;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import javax.annotation.PostConstruct;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -27,17 +29,36 @@ public class MemberServiceTest {
 	@PostConstruct
 	void init() {
 		Member m1 = new Member();
-		m1.setEmail("rojarsmith@abc.com");
+		m1.setEmail("rojarsmith@gmail.com");
 		m1.setUsername("Rojar");
 		m1.setPassword("abc");
 		memberService.save(m1);
+
+		Member m2 = new Member();
+		m2.setEmail("dev@aext.io");
+		m2.setUsername("Dev かいはつ");
+		m2.setPassword("abc");
+		memberService.save(m2);
 	}
 
 	@Test
 	public void commonTest() {
 		boolean isEmailExist = memberService.isEmailExist("");
 		assertEquals(isEmailExist, false);
+		boolean isEmailExist2 = memberService.isEmailExist("dev@aext.io");
+		assertEquals(isEmailExist2, true);
+
+		Executable executable = new Executable() {
+			public void execute() {
+				MemberService ms1 = new MemberService();
+				ms1.isEmailExist("");
+			}
+		};
+		assertThrows(Exception.class, executable);
+
 		MemberService ms1 = new MemberService();
-		assertEquals(ms1.isEmailExist(""), false);
+		assertThrows(Exception.class, () -> {
+			ms1.isEmailExist("");
+		});
 	}
 }

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import io.aext.core.base.dao.MemberDao;
 import io.aext.core.base.entity.Member;
-import io.aext.core.base.util.Foo;
 
 /**
  * @author rojar
@@ -19,17 +18,12 @@ public class MemberService extends BaseService<MemberService> {
 	@Autowired
 	private MemberDao memberDao;
 
-	@Autowired
-	private Foo foo;
-
 	public boolean isEmailExist(String email) {
-	//	List<Member> list = memberDao.getAllByEmailEquals(email);
-//		return list.size() > 0 ? true : false;
-
-		return false;
+		List<Member> list = memberDao.getAllByEmailEquals(email);
+		return list.size() > 0 ? true : false;
 	}
-	
-	 public Member save(Member member) {
-	        return memberDao.save(member);
-	    }
+
+	public Member save(Member member) {
+		return memberDao.save(member);
+	}
 }
