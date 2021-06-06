@@ -9,9 +9,11 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -88,8 +90,9 @@ public class MemberController extends BaseController {
 	public ResponseEntity<?> sendEmailVerifyGuest(String email) {
 		try {
 			Optional<Member> member = memberService.findByEmail(email);
-			if (member.isPresent()) {
-				return success(localeMessageSourceService.getMessage("EMAIL_CAN_NOT_USE"));
+			if (!member.isPresent()) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						localeMessageSourceService.getMessage("EMAIL_CAN_NOT_USE"));
 			}
 
 			if (!StringUtils.hasText(email) || !ValueValidate.validateEmail(email)) {
@@ -114,7 +117,7 @@ public class MemberController extends BaseController {
 				meesage = ((ResponseStatusException) e).getReason();
 			}
 
-			return error(meesage);
+			return error(meesage, ExceptionUtils.getStackTrace(e));
 		}
 	}
 }
