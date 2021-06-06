@@ -7,10 +7,12 @@ import io.aext.core.base.entity.Member;
 /**
  * @author rojar
  *
- * @date 2021-06-05
+ * @date 2021-06-06
  */
 public interface MemberDao extends BaseDao<Member> {
 	List<Member> getAllByEmailEquals(String email);
 	
 	List<Member> getAllByUsernameEquals(String username);
+	
+	Member findMemberByEmail(String email);
 }

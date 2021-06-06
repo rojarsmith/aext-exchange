@@ -9,12 +9,16 @@ import io.aext.core.base.entity.Member;
 /**
  * @author rojar
  *
- * @date 2021-06-05
+ * @date 2021-06-06
  */
 @Service
 public class MemberService extends BaseService<MemberService> {
 	@Autowired
 	private MemberDao memberDao;
+
+	public Member findByEmail(String email) {
+		return memberDao.findMemberByEmail(email);
+	}
 
 	public boolean isEmailExist(String email) {
 		return memberDao.getAllByEmailEquals(email).size() > 0 ? true : false;
