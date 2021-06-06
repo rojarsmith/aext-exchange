@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.payload.MessageResponse;
+import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
 import io.aext.core.service.payload.RegisterByEmail;
 
@@ -29,9 +30,9 @@ import static org.springframework.util.Assert.isTrue;
  * @date 2021/6/5
  */
 @RestController
-public class Member extends BaseController {
+public class MemberController extends BaseController {
 	@Autowired
-	MessageSource messageSource;
+	LocaleMessageSourceService localeMessageSourceService;
 
 	@Autowired
 	MemberService memberService;
@@ -54,18 +55,17 @@ public class Member extends BaseController {
 			}
 			data.put("errors", errors);
 
-			String meesage = messageSource.getMessage("RegisterByEmail.register.failed", null,
-					LocaleContextHolder.getLocale());
+			String meesage = localeMessageSourceService.getMessage("RegisterByEmail.register.failed");
 
 			return error(500, meesage, data);
 		}
 //		String email = ;
 		isTrue(!memberService.isEmailExist(registerByEmail.getEmail()),
-				messageSource.getMessage("EMAIL_ALREADY_BOUND", null, LocaleContextHolder.getLocale()));
+				localeMessageSourceService.getMessage("EMAIL_ALREADY_BOUND"));
 		isTrue(!memberService.isUsernameExist(registerByEmail.getUsername()),
-				messageSource.getMessage("USERNAME_ALREADY_EXISTS", null, LocaleContextHolder.getLocale()));
+				localeMessageSourceService.getMessage("USERNAME_ALREADY_EXISTS"));
 		isTrue(memberService.isUsernameExist(registerByEmail.getUsername()),
-				messageSource.getMessage("USERNAME_ALREADY_EXISTS", null, LocaleContextHolder.getLocale()));
+				localeMessageSourceService.getMessage("USERNAME_ALREADY_EXISTS"));
 		return null;
 	}
 }
