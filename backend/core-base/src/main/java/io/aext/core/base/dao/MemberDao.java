@@ -1,6 +1,7 @@
 package io.aext.core.base.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import io.aext.core.base.entity.Member;
 
@@ -14,5 +15,5 @@ public interface MemberDao extends BaseDao<Member> {
 	
 	List<Member> getAllByUsernameEquals(String username);
 	
-	Member findMemberByEmail(String email);
+	Optional<Member> findMemberByEmail(String email);
 }

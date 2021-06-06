@@ -3,6 +3,8 @@ package io.aext.core.base;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Optional;
+
 import javax.annotation.PostConstruct;
 
 import org.junit.jupiter.api.Test;
@@ -60,5 +62,10 @@ public class MemberServiceTest {
 		assertThrows(Exception.class, () -> {
 			ms1.isEmailExist("");
 		});
+		
+		
+		 Optional<Member> m3 = memberService.findByEmail("dev@aext.io");
+		 assertEquals(m3.isPresent(), true);
+		 
 	}
 }

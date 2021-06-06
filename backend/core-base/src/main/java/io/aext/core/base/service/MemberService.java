@@ -1,5 +1,7 @@
 package io.aext.core.base.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,7 @@ public class MemberService extends BaseService<MemberService> {
 	@Autowired
 	private MemberDao memberDao;
 
-	public Member findByEmail(String email) {
+	public Optional<Member> findByEmail(String email) {
 		return memberDao.findMemberByEmail(email);
 	}
 
