@@ -2,6 +2,7 @@ package io.aext.core.base.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
 import io.aext.core.base.payload.MessageResponse;
 
@@ -9,27 +10,23 @@ public class BaseController {
 	@SuppressWarnings("unused")
 	private final static Logger logger = LoggerFactory.getLogger(BaseController.class);
 
-	protected MessageResponse success() {
-		return success("SUCCESS", null);
+	protected ResponseEntity<?> success() {
+		return success("Success", null);
 	}
 
-	protected MessageResponse success(String msg) {
+	protected ResponseEntity<?> success(String msg) {
 		return success(msg, null);
 	}
 
-	protected MessageResponse success(String msg, Object obj) {
-		return new MessageResponse(0, msg, obj);
+	protected ResponseEntity<?> success(String msg, Object obj) {
+		return ResponseEntity.ok().body(new MessageResponse(msg, obj));
 	}
 
-	protected MessageResponse error(String msg) {
-		return error(500, msg);
+	protected ResponseEntity<?> error(String msg) {
+		return error(msg, null);
 	}
 
-	protected MessageResponse error(int code, String msg) {
-		return error(code, msg);
-	}
-
-	protected MessageResponse error(int code, String msg, Object obj) {
-		return new MessageResponse(code, msg, obj);
+	protected ResponseEntity<?> error(String msg, Object obj) {
+		return ResponseEntity.badRequest().body(new MessageResponse(msg, obj));
 	}
 }

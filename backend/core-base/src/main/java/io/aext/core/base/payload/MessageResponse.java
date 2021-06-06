@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class MessageResponse {
-	private int code;
 	private String message;
 	private Object data;
 	private int totalPage;
@@ -18,11 +17,10 @@ public class MessageResponse {
 	public MessageResponse(int code, String msg) {
 		// Must set null to avoid error:
 		// No serializer found for class java.lang.Object
-		this(code, msg, null);
+		this(msg, null);
 	}
 
-	public MessageResponse(int code, String msg, Object object) {
-		this.code = code;
+	public MessageResponse(String msg, Object object) {
 		this.message = msg;
 		this.data = object;
 	}
