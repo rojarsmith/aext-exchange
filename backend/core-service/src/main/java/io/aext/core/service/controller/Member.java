@@ -34,7 +34,7 @@ public class Member extends BaseController {
 	MessageSource messageSource;
 
 	@Autowired
-	private MemberService memberService;
+	MemberService memberService;
 	
 	/**
 	 * Register by email.
