@@ -8,8 +8,6 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,12 +28,15 @@ import static org.springframework.util.Assert.isTrue;
  * @date 2021/6/5
  */
 @RestController
-public class MemberController extends BaseController {
+public class MemberController extends BaseController {	
+	//@Autowired
+	//private RedisTemplate redisTemplate;
+	
 	@Autowired
 	LocaleMessageSourceService localeMessageSourceService;
 
 	@Autowired
-	MemberService memberService;
+	MemberService memberService;	
 
 	/**
 	 * Register by email.
@@ -59,13 +60,13 @@ public class MemberController extends BaseController {
 
 			return error(500, meesage, data);
 		}
-//		String email = ;
+
 		isTrue(!memberService.isEmailExist(registerByEmail.getEmail()),
 				localeMessageSourceService.getMessage("EMAIL_ALREADY_BOUND"));
 		isTrue(!memberService.isUsernameExist(registerByEmail.getUsername()),
 				localeMessageSourceService.getMessage("USERNAME_ALREADY_EXISTS"));
-		isTrue(memberService.isUsernameExist(registerByEmail.getUsername()),
-				localeMessageSourceService.getMessage("USERNAME_ALREADY_EXISTS"));
+		
+		
 		return null;
 	}
 }
