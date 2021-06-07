@@ -11,6 +11,6 @@ public class MessageResponseTest {
 	public void commonTest() {
 		MessageResponse mr1 = new MessageResponse("OK");
 		String json1 = mr1.toString();
-		assertEquals("{\"code\":0,\"message\":\"OK\",\"data\":null,\"totalPage\":0,\"totalElement\":0}", json1);
+		assertEquals("{\"message\":\"OK\",\"data\":null,\"totalPage\":0,\"totalElement\":0}", json1);
 	}
 }

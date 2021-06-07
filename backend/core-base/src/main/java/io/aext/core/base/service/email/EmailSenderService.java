@@ -1,4 +1,4 @@
-package io.aext.core.base.service;
+package io.aext.core.base.service.email;
 
 import javax.mail.internet.MimeMessage;
 

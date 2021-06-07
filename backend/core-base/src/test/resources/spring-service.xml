@@ -13,6 +13,8 @@
 	<context:component-scan
 		base-package="io.aext.core.base.service" />
 	<context:component-scan
+		base-package="io.aext.core.base.service.email" />
+	<context:component-scan
 		base-package="io.aext.core.base.util" />
 	<context:component-scan
 		base-package="io.aext.core.base.entity" />
@@ -48,5 +50,23 @@
 		class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory"
 			ref="entityManagerFactory" />
+	</bean>
+	<!-- SET default mail properties -->
+	<bean id="mailSender"
+		class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.gmail.com" />
+		<property name="port" value="25" />
+		<property name="username" value="admin@gmail.com" />
+		<property name="password" value="password" />
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.transport.protocol">smtp</prop>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+				<prop key="mail.debug">true</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="templateEngine" class="org.thymeleaf.TemplateEngine">
 	</bean>
 </beans>
