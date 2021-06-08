@@ -58,9 +58,12 @@ dependencies {
     
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.0'
-    
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.0'
     
+    testCompileOnly 'org.projectlombok:lombok:1.18.20'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+	
     runtimeOnly 'com.h2database:h2:1.4.200'
 }
 
