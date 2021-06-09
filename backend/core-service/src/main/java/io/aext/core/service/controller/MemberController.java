@@ -12,7 +12,7 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,9 +54,8 @@ public class MemberController extends BaseController {
 	@Value("${service.company}")
 	private String company;
 
-	@SuppressWarnings("rawtypes")
 	@Autowired
-	private RedisTemplate redisTemplate;
+	private StringRedisTemplate redisTemplate;
 
 	@Autowired
 	LocaleMessageSourceService localeMessageSourceService;
