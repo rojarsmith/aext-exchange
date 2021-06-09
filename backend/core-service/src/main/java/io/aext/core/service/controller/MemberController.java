@@ -1,16 +1,17 @@
 package io.aext.core.service.controller;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
@@ -24,17 +25,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import io.aext.core.base.constant.SysConstant;
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.entity.Member;
 import io.aext.core.base.payload.MessageResponse;
 import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
+import io.aext.core.base.service.email.EmailSenderService;
+import io.aext.core.base.service.email.MCVerifyCode;
+import io.aext.core.base.service.email.MailContentBuilder;
 import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.payload.RegisterByEmail;
 
 import static org.springframework.util.Assert.isTrue;
+
+import static io.aext.core.base.constant.SysConstant.*;
 
 /**
  * @author Rojar Smith
@@ -43,6 +48,12 @@ import static org.springframework.util.Assert.isTrue;
  */
 @RestController
 public class MemberController extends BaseController {
+	@Value("${spring.mail.username}")
+	private String fromAddress;
+
+	@Value("${service.company}")
+	private String company;
+
 	@SuppressWarnings("rawtypes")
 	@Autowired
 	private RedisTemplate redisTemplate;
@@ -52,6 +63,12 @@ public class MemberController extends BaseController {
 
 	@Autowired
 	MemberService memberService;
+
+	@Autowired
+	private EmailSenderService emailSenderService;
+
+	@Autowired
+	MailContentBuilder mailContentBuilder;
 
 	/**
 	 * Register by email.
@@ -84,31 +101,42 @@ public class MemberController extends BaseController {
 		return null;
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@RequestMapping(value = "/v1/member/send/guest/email/verify", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<?> sendEmailVerifyGuest(String email) {
 		try {
 			Optional<Member> member = memberService.findByEmail(email);
-			if (!member.isPresent()) {
+			if (member.isPresent()) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 						localeMessageSourceService.getMessage("EMAIL_CAN_NOT_USE"));
 			}
 
 			if (!StringUtils.hasText(email) || !ValueValidate.validateEmail(email)) {
-				String meesage = localeMessageSourceService.getMessage("EMAIL_CAN_NOT_USE");
-				return error(meesage);
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						localeMessageSourceService.getMessage("EMAIL_CAN_NOT_USE"));
 			}
 
 			ValueOperations valueOperations = redisTemplate.opsForValue();
-			Object cache = Optional.ofNullable(valueOperations.get(SysConstant.EMAIL_GUEST_VERIFY_CODE_PREFIX + email))
-					.orElse("N");
+			Object cache = Optional.ofNullable(valueOperations.get(EMAIL_GUEST_VERIFY_CODE_PREFIX + email)).orElse("N");
 			if (!cache.toString().equals("N")) {
-				// return error(localeMessageSourceService.getMessage("EMAIL_ALREADY_SEND"));
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+						localeMessageSourceService.getMessage("EMAIL_ALREADY_SEND"));
 			}
 			String code = SHA2.getSHA256VerifyLen6();
 
-//			sendEmailVerify(valueOperations, email, code);
+			// Send Mail
+			String subject = localeMessageSourceService.getMessage("EMAIL_VERIFICATION_CODE_TITLE");
+			String[] mailList = { email };
+			MCVerifyCode mcVerifyCode = new MCVerifyCode();
+			mcVerifyCode.setSubject(subject);
+			mcVerifyCode.setCode(code);
+			Optional<String> mailContent = mailContentBuilder.generateMailContent(mcVerifyCode);
+			if (mailContent.isPresent()) {
+				emailSenderService.sendComplexEmail(mailList, fromAddress, company, subject, mailContent.get());
+			}
+
+			valueOperations.set(EMAIL_GUEST_VERIFY_CODE_PREFIX + email, code, 10, TimeUnit.MINUTES);
 
 			return success();
 		} catch (Exception e) {
@@ -120,4 +148,5 @@ public class MemberController extends BaseController {
 			return error(meesage, ExceptionUtils.getStackTrace(e));
 		}
 	}
+
 }

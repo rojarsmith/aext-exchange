@@ -47,6 +47,11 @@ public class SHA2 {
 	public static String getSHA256VerifyLen6() {
 		int v = getSHA256(Instant.now().toString()).hashCode() % 1000000;
 		v = v < 0 ? v * -1 : v;
-		return Integer.toString(v);
+
+		String code = Integer.toString(v);
+		if (code.length() != 6) {
+			return "831226";
+		}
+		return code;
 	}
 }
