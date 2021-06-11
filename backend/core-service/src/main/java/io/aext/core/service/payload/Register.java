@@ -13,7 +13,7 @@ import lombok.Data;
  * @date 2021-6-05
  */
 @Data
-public class RegisterByEmail {
+public class Register {
 	@NotBlank(message = "{RegisterByEmail.email.null}")
 	@Email(message = "{RegisterByEmail.email.format}")
 	private String email;
@@ -30,4 +30,10 @@ public class RegisterByEmail {
 
 	@NotBlank(message = "{RegisterByEmail.verify.null}")
 	private String verify;
+
+	/*
+	 * SMS, EMAIL
+	 */
+	@NotBlank
+	private String method;
 }

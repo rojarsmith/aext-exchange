@@ -35,7 +35,7 @@ import io.aext.core.base.service.email.MCVerifyCode;
 import io.aext.core.base.service.email.MailContentBuilder;
 import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
-import io.aext.core.service.payload.RegisterByEmail;
+import io.aext.core.service.payload.Register;
 
 import static org.springframework.util.Assert.isTrue;
 
@@ -74,22 +74,14 @@ public class MemberController extends BaseController {
 	 */
 	@RequestMapping("/v1/member/register/email")
 	@ResponseBody
-	public MessageResponse registerByEmail(@Valid RegisterByEmail registerByEmail, BindingResult bindingResult)
+	public MessageResponse registerByEmail(@Valid Register registerByEmail, BindingResult bindingResult)
 			throws Exception {
 		if (bindingResult.hasErrors()) {
-			Map<String, List<Map<String, String>>> data = new HashMap<>();
+			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
 			List<Map<String, String>> errors = new ArrayList<>();
-			for (FieldError fieldError : bindingResult.getFieldErrors()) {
-				Map<String, String> error = new HashMap<>();
-				error.put("field", fieldError.getField());
-				error.put("message", fieldError.getDefaultMessage());
-				errors.add(error);
-			}
-			data.put("errors", errors);
-
 			String meesage = localeMessageSourceService.getMessage("REGISTRATION_FAILED");
 
-			// return error(500, meesage, data);
+			return error(meesage, data);
 		}
 
 		isTrue(!memberService.isEmailExist(registerByEmail.getEmail()),
@@ -99,7 +91,7 @@ public class MemberController extends BaseController {
 
 		return null;
 	}
-
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@RequestMapping(value = "/v1/member/send/guest/email/verify", method = RequestMethod.POST)
 	@ResponseBody

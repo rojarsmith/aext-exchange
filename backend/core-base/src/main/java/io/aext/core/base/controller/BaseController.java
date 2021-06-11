@@ -12,7 +12,7 @@ import org.springframework.validation.FieldError;
 import io.aext.core.base.payload.MessageResponse;
 
 public class BaseController {
-	protected Map<String, List<Map<String, String>>> buildErrorData(BindingResult bindingResult) {
+	protected Map<String, List<Map<String, String>>> buildBindingResultData(BindingResult bindingResult) {
 		Map<String, List<Map<String, String>>> data = new HashMap<>();
 		List<Map<String, String>> errors = new ArrayList<>();
 		for (FieldError fieldError : bindingResult.getFieldErrors()) {

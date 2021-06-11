@@ -10,6 +10,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  *
  * @date 2021-06-06
  */
+@SuppressWarnings("rawtypes")
 @Component
 public class BaseService<T> extends TopBaseService {
     @Autowired

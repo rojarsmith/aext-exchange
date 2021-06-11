@@ -7,6 +7,7 @@ import io.aext.core.base.dao.BaseDao;
  *
  * @date 2021-06-06
  */
+@SuppressWarnings("rawtypes")
 public class TopBaseService <E, D extends BaseDao> {
 
 }
