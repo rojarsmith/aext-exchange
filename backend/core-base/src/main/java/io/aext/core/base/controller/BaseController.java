@@ -1,14 +1,29 @@
 package io.aext.core.base.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import io.aext.core.base.payload.MessageResponse;
 
 public class BaseController {
-	@SuppressWarnings("unused")
-	private final static Logger logger = LoggerFactory.getLogger(BaseController.class);
+	protected Map<String, List<Map<String, String>>> buildErrorData(BindingResult bindingResult) {
+		Map<String, List<Map<String, String>>> data = new HashMap<>();
+		List<Map<String, String>> errors = new ArrayList<>();
+		for (FieldError fieldError : bindingResult.getFieldErrors()) {
+			Map<String, String> error = new HashMap<>();
+			error.put("field", fieldError.getField());
+			error.put("message", fieldError.getDefaultMessage());
+			errors.add(error);
+		}
+		data.put("errors", errors);
+		return data;
+	}
 
 	protected ResponseEntity<?> success() {
 		return success("Success", null);
