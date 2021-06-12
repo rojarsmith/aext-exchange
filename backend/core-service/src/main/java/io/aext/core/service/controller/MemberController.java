@@ -1,5 +1,6 @@
 package io.aext.core.service.controller;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import io.aext.core.base.constant.CommonStatus;
+import io.aext.core.base.constant.MemberLevelEnum;
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.entity.Member;
 import io.aext.core.base.payload.MessageResponse;
@@ -74,24 +77,48 @@ public class MemberController extends BaseController {
 	 */
 	@RequestMapping("/v1/member/register/email")
 	@ResponseBody
-	public MessageResponse registerByEmail(@Valid Register registerByEmail, BindingResult bindingResult)
-			throws Exception {
+	public ResponseEntity<?> registerByEmail(@Valid Register register, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
-			List<Map<String, String>> errors = new ArrayList<>();
 			String meesage = localeMessageSourceService.getMessage("REGISTRATION_FAILED");
 
 			return error(meesage, data);
 		}
 
-		isTrue(!memberService.isEmailExist(registerByEmail.getEmail()),
-				localeMessageSourceService.getMessage("EMAIL_ALREADY_BOUND"));
-		isTrue(!memberService.isUsernameExist(registerByEmail.getUsername()),
-				localeMessageSourceService.getMessage("USERNAME_ALREADY_EXISTS"));
+		if (memberService.isUsernameExist(register.getUsername())) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					localeMessageSourceService.getMessage("USERNAME_ALREADY_EXISTS"));
+		}
+		if (memberService.isUsernameExist(register.getEmail())) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					localeMessageSourceService.getMessage("EMAIL_CAN_NOT_USE"));
+		}
+		if (register.getMethod().toUpperCase().equals("EMAIL")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					localeMessageSourceService.getMessage("SYSTEM_ERROR"));
+		}
+		
+		// Read cache
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVE_CODE_PREFIX + register.getEmail())).orElse("N");
+		if (!cache.toString().equals("N")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					localeMessageSourceService.getMessage("EMAIL_ALREADY_SEND"));
+		}
 
-		return null;
+		// Creating user's account
+		Member member = new Member();
+		member.setUsername(register.getUsername());
+		member.setPassword(register.getPassword());
+		member.setEmail(register.getEmail());
+		member.setRegistTime(Instant.now());
+		member.setMemberLevel(MemberLevelEnum.GENERAL);
+		member.setCommonStatus(CommonStatus.NORMAL);
+		memberService.save(member);
+		
+		return success();
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@RequestMapping(value = "/v1/member/send/guest/email/verify", method = RequestMethod.POST)
 	@ResponseBody

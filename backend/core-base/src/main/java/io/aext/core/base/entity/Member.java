@@ -69,5 +69,5 @@ public class Member {
 	private MemberLevelEnum memberLevel;
 
 	@Enumerated(EnumType.ORDINAL)
-	private CommonStatus status = CommonStatus.NORMAL;
+	private CommonStatus commonStatus = CommonStatus.NORMAL;
 }
