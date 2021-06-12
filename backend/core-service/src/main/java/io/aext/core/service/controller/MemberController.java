@@ -50,6 +50,7 @@ import static io.aext.core.base.constant.SysConstant.*;
  * @date 2021/6/5
  */
 @RestController
+@RequestMapping(value = { "/api/v1/member" })
 public class MemberController extends BaseController {
 	@Value("${spring.mail.username}")
 	private String fromAddress;
@@ -75,7 +76,7 @@ public class MemberController extends BaseController {
 	/**
 	 * Register by email.
 	 */
-	@RequestMapping("/v1/member/register/email")
+	@RequestMapping("/register/email")
 	@ResponseBody
 	public ResponseEntity<?> registerByEmail(@Valid Register register, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
@@ -93,14 +94,15 @@ public class MemberController extends BaseController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					localeMessageSourceService.getMessage("EMAIL_CAN_NOT_USE"));
 		}
-		if (register.getMethod().toUpperCase().equals("EMAIL")) {
+		if (!register.getMethod().toUpperCase().equals("EMAIL")) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					localeMessageSourceService.getMessage("SYSTEM_ERROR"));
 		}
-		
+
 		// Read cache
 		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVE_CODE_PREFIX + register.getEmail())).orElse("N");
+		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVE_CODE_PREFIX + register.getEmail()))
+				.orElse("N");
 		if (!cache.toString().equals("N")) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					localeMessageSourceService.getMessage("EMAIL_ALREADY_SEND"));
@@ -115,12 +117,12 @@ public class MemberController extends BaseController {
 		member.setMemberLevel(MemberLevelEnum.GENERAL);
 		member.setCommonStatus(CommonStatus.NORMAL);
 		memberService.save(member);
-		
+
 		return success();
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@RequestMapping(value = "/v1/member/send/guest/email/verify", method = RequestMethod.POST)
+	@RequestMapping(value = "/send/guest/email/verify", method = RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<?> sendEmailVerifyGuest(String email) {
 		try {
