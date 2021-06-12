@@ -1,5 +1,6 @@
 package io.aext.core.service.controller;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
@@ -18,11 +18,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.aext.core.base.constant.CommonStatus;
 import io.aext.core.base.constant.MemberLevelEnum;
@@ -31,10 +33,12 @@ import io.aext.core.base.entity.Member;
 import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
 import io.aext.core.base.service.email.EmailSenderService;
+import io.aext.core.base.service.email.MCActiveConfirm;
 import io.aext.core.base.service.email.MCVerifyCode;
 import io.aext.core.base.service.email.MailContentBuilder;
 import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
+import io.aext.core.service.ServiceProperty;
 import io.aext.core.service.payload.Register;
 
 import static io.aext.core.base.constant.SysConstant.*;
@@ -47,17 +51,14 @@ import static io.aext.core.base.constant.SysConstant.*;
 @RestController
 @RequestMapping(value = { "/api/v1/member" })
 public class MemberController extends BaseController {
-	@Value("${spring.mail.username}")
-	private String fromAddress;
-
-	@Value("${service.company}")
-	private String company;
+	@Autowired
+	ServiceProperty serviceProperty;
 
 	@Autowired
-	private PasswordEncoder passwordEncoder;
+	PasswordEncoder passwordEncoder;
 
 	@Autowired
-	private StringRedisTemplate redisTemplate;
+	StringRedisTemplate redisTemplate;
 
 	@Autowired
 	LocaleMessageSourceService localeMessageSourceService;
@@ -66,7 +67,7 @@ public class MemberController extends BaseController {
 	MemberService memberService;
 
 	@Autowired
-	private EmailSenderService emailSenderService;
+	EmailSenderService emailSenderService;
 
 	@Autowired
 	MailContentBuilder mailContentBuilder;
@@ -116,6 +117,38 @@ public class MemberController extends BaseController {
 		member.setCommonStatus(CommonStatus.NORMAL);
 		memberService.save(member);
 
+		// Confirmation Mail
+		String code = SHA2.getSHA512Short(0, 8).toUpperCase();
+
+		URI locationConfirm = ServletUriComponentsBuilder
+				.fromUriString(serviceProperty.getFrontDomain() + serviceProperty.getFrontConfirm() + "/" + code)
+				.buildAndExpand().encode().toUri();
+
+		if (serviceProperty.isDev()) {
+			String path = getRequestMappingPath("registerConfirmEmail(");
+			locationConfirm = ServletUriComponentsBuilder.fromCurrentContextPath().path(path).buildAndExpand(code)
+					.encode().toUri();
+		}
+
+		// Send Mail
+		String subject = localeMessageSourceService.getMessage("EMAIL_ACTIVATION_CONFIRM_TITLE");
+		String[] mailList = { member.getEmail() };
+		MCActiveConfirm content = new MCActiveConfirm();
+		content.setSubject(subject);
+		content.setConfirmUrl(locationConfirm.toString());
+		Optional<String> mailContent = mailContentBuilder.generateMailContent(content);
+		if (mailContent.isPresent()) {
+			emailSenderService.sendComplexEmail(mailList, serviceProperty.getMailUsername(),
+					serviceProperty.getCompany(), subject, mailContent.get());
+		}
+
+		valueOperations.set(EMAIL_ACTIVE_CODE_PREFIX + member.getEmail(), code, 10, TimeUnit.MINUTES);
+
+		return success(localeMessageSourceService.getMessage("SEND_REGISTER_EMAIL_SUCCESS"));
+	}
+
+	@RequestMapping(value = { "/register/confirm/email/{token}" }, method = { RequestMethod.GET })
+	public ResponseEntity<?> registerConfirmEmail(@Valid @PathVariable("token") String token) {
 		return success();
 	}
 
@@ -151,7 +184,8 @@ public class MemberController extends BaseController {
 			mcVerifyCode.setCode(code);
 			Optional<String> mailContent = mailContentBuilder.generateMailContent(mcVerifyCode);
 			if (mailContent.isPresent()) {
-				emailSenderService.sendComplexEmail(mailList, fromAddress, company, subject, mailContent.get());
+				emailSenderService.sendComplexEmail(mailList, serviceProperty.getMailUsername(),
+						serviceProperty.getCompany(), subject, mailContent.get());
 			}
 
 			valueOperations.set(EMAIL_GUEST_VERIFY_CODE_PREFIX + email, code, 10, TimeUnit.MINUTES);

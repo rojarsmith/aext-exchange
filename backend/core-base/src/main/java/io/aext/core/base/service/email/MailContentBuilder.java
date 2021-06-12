@@ -10,7 +10,7 @@ import org.thymeleaf.context.Context;
 /**
  * @author rojar
  *
- * @date 2021-06-06
+ * @date 2021-06-12
  */
 @Service
 public class MailContentBuilder {
@@ -26,6 +26,10 @@ public class MailContentBuilder {
 			MCVerifyCode data = (MCVerifyCode) content;
 			context.setVariable("data", data);
 			return Optional.ofNullable(templateEngine.process("mailVerifyCode", context));
+		} else if (content instanceof MCActiveConfirm) {
+			MCActiveConfirm data = (MCActiveConfirm) content;
+			context.setVariable("data", data);
+			return Optional.ofNullable(templateEngine.process("mailActiveConfirm", context));
 		}
 
 		return Optional.empty();

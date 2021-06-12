@@ -4,14 +4,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import io.aext.core.base.payload.MessageResponse;
 
 public class BaseController {
+	@Autowired
+	private ApplicationContext applicationContext;
+
 	protected Map<String, List<Map<String, String>>> buildBindingResultData(BindingResult bindingResult) {
 		Map<String, List<Map<String, String>>> data = new HashMap<>();
 		List<Map<String, String>> errors = new ArrayList<>();
@@ -23,6 +32,24 @@ public class BaseController {
 		}
 		data.put("errors", errors);
 		return data;
+	}
+
+	/*
+	 * Get mapping path by method name.
+	 */
+	public String getRequestMappingPath(String target) {
+		Map<RequestMappingInfo, HandlerMethod> methods = applicationContext.getBean(RequestMappingHandlerMapping.class)
+				.getHandlerMethods().entrySet().stream().filter(x -> x.getValue().toString().contains(target))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+		if (!methods.entrySet().iterator().hasNext()) {
+			return "";
+		}
+
+		String key = methods.entrySet().iterator().next().getKey().getPatternsCondition().toString();
+		key = key.substring(1, key.length() - 1);
+
+		return key;
 	}
 
 	protected ResponseEntity<?> success() {

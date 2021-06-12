@@ -10,6 +10,6 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MCVerifyCode extends MCBase {
-	String code;
+public class MCActiveConfirm extends MCBase {
+	String confirmUrl;
 }
