@@ -65,9 +65,9 @@ public class Member {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Instant registTime;
 
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	private MemberLevelEnum memberLevel;
 
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	private CommonStatus commonStatus = CommonStatus.NORMAL;
 }
