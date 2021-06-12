@@ -19,23 +19,20 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-logging'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	//implementation 'org.springframework.boot:spring-boot-autoconfigure'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.retry:spring-retry'
-    //implementation 'it.ozimov:embedded-redis:0.7.3'
-	implementation 'org.apache.commons:commons-lang3'	
+	implementation 'org.apache.commons:commons-lang3'
+	implementation 'org.postgresql:postgresql:42.2.12'	
     implementation 'com.icegreen:greenmail-junit5:1.6.0'
 	implementation project(':core-base')
 	
 	compileOnly 'org.projectlombok:lombok'
-	//compileOnly ('it.ozimov:embedded-redis:0.7.3') {
-	//    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-	//}
 	
 	runtimeOnly project(':core-base')
 	
@@ -44,10 +41,11 @@ dependencies {
 		
 	annotationProcessor 'org.projectlombok:lombok'
 	
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'it.ozimov:embedded-redis:0.7.3'
 	testImplementation 'com.h2database:h2'
 	testImplementation 'com.icegreen:greenmail-junit5:1.6.0'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
 }
 

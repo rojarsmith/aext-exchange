@@ -14,7 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @date 2021-06-05
  */
 @Configuration
-public class CustomWebMvcConfigurer implements WebMvcConfigurer {
+public class CustomWebMvcConfig implements WebMvcConfigurer {
 	@Autowired
 	private MessageSource messageSource;
 	

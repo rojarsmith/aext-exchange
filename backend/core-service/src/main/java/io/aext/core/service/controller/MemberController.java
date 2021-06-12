@@ -1,8 +1,6 @@
 package io.aext.core.service.controller;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -30,7 +27,6 @@ import io.aext.core.base.constant.CommonStatus;
 import io.aext.core.base.constant.MemberLevelEnum;
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.entity.Member;
-import io.aext.core.base.payload.MessageResponse;
 import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
 import io.aext.core.base.service.email.EmailSenderService;
@@ -39,8 +35,6 @@ import io.aext.core.base.service.email.MailContentBuilder;
 import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.payload.Register;
-
-import static org.springframework.util.Assert.isTrue;
 
 import static io.aext.core.base.constant.SysConstant.*;
 
