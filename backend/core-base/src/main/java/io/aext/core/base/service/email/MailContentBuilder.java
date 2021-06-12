@@ -1,8 +1,10 @@
 package io.aext.core.base.service.email;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -21,7 +23,8 @@ public class MailContentBuilder {
 	}
 
 	public <T extends MCBase> Optional<String> generateMailContent(T content) {
-		Context context = new Context();
+		Locale locale = LocaleContextHolder.getLocale();
+		Context context = new Context(locale);
 		if (content instanceof MCVerifyCode) {
 			MCVerifyCode data = (MCVerifyCode) content;
 			context.setVariable("data", data);
