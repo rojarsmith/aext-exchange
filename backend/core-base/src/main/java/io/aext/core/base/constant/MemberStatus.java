@@ -13,8 +13,16 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum MemberLevel implements BaseEnum {
-	REGISTERD, VERIFIED_EMAIL;
+public enum MemberStatus implements BaseEnum {
+	REGISTERD, VERIFIED_EMAIL,
+	/*
+	 * Can login but can not exchange.
+	 */
+	SUSPICIOUS,
+	/**
+	 * Can not login
+	 */
+	ILLEGAL;
 
 	@Override
 	@JsonValue

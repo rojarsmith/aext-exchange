@@ -15,8 +15,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import io.aext.core.base.constant.CommonStatus;
-import io.aext.core.base.constant.MemberLevel;
+import io.aext.core.base.constant.MemberStatus;
 import lombok.Data;
 
 /**
@@ -51,20 +50,13 @@ public class Member {
 	@Column(unique = true)
 	private String email;
 
-	@Column(nullable = false)
-	private Boolean emailVerified = false;
-
 	@Column(unique = true)
 	private String emailRescue;
-
-	@Column(nullable = false)
-	private Boolean emailRescueVerified = false;
 
 	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Instant registTime;
 
-	private EnumSet<MemberLevel> memberLevel = EnumSet.of(MemberLevel.REGISTERD);
-
-	private EnumSet<CommonStatus> commonStatus = EnumSet.noneOf(CommonStatus.class);
+	@Column(name = "status")
+	private EnumSet<MemberStatus> memberLevel = EnumSet.noneOf(MemberStatus.class);
 }

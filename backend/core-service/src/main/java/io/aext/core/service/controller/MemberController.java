@@ -27,8 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import io.aext.core.base.constant.CommonStatus;
-import io.aext.core.base.constant.MemberLevel;
+import io.aext.core.base.constant.MemberStatus;
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.entity.Member;
 import io.aext.core.base.service.LocaleMessageSourceService;
@@ -114,8 +113,7 @@ public class MemberController extends BaseController {
 		member.setPassword(passwordEncoder.encode(register.getPassword()));
 		member.setEmail(register.getEmail());
 		member.setRegistTime(Instant.now());
-		member.setMemberLevel(EnumSet.of(MemberLevel.REGISTERD));
-		member.setCommonStatus(EnumSet.noneOf(CommonStatus.class));
+		member.setMemberLevel(EnumSet.of(MemberStatus.REGISTERD));
 		memberService.save(member);
 
 		// Confirmation Mail
@@ -166,7 +164,7 @@ public class MemberController extends BaseController {
 					localeMessageSourceService.getMessage("INVALID_LINK"));
 		}
 
-		member.get().getMemberLevel().add(MemberLevel.VERIFIED_EMAIL);
+		member.get().getMemberLevel().add(MemberStatus.VERIFIED_EMAIL);
 		memberService.save(member.get());
 
 		valueOperations.getOperations().delete(EMAIL_ACTIVE_CODE_PREFIX + username);
