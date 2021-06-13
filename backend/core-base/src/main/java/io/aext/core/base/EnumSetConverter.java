@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import javax.persistence.AttributeConverter;
 
-import io.aext.core.base.constant.MemberLevelEnum;
+import io.aext.core.base.constant.MemberLevel;
 
 /**
  * @author rojar
@@ -16,8 +16,7 @@ public class EnumSetConverter<E extends Enum<E>> implements AttributeConverter<E
 
 	private final Class<E> clazz;
 
-	@SuppressWarnings("unchecked")
-	public EnumSetConverter(Class<MemberLevelEnum> clazz) {
+	public EnumSetConverter(Class<E> clazz) {
 		this.clazz = (Class<E>) clazz;
 	}
 

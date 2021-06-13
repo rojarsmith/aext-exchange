@@ -1,11 +1,10 @@
 package io.aext.core.base.entity;
 
 import java.time.Instant;
+import java.util.EnumSet;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.aext.core.base.constant.CommonStatus;
-import io.aext.core.base.constant.MemberLevelEnum;
+import io.aext.core.base.constant.MemberLevel;
 import lombok.Data;
 
 /**
@@ -65,9 +64,7 @@ public class Member {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Instant registTime;
 
-	@Enumerated(EnumType.STRING)
-	private MemberLevelEnum memberLevel;
+	private EnumSet<MemberLevel> memberLevel = EnumSet.of(MemberLevel.GENERAL);
 
-	@Enumerated(EnumType.STRING)
-	private CommonStatus commonStatus = CommonStatus.NORMAL;
+	private EnumSet<CommonStatus> commonStatus = EnumSet.of(CommonStatus.NORMAL);
 }

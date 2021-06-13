@@ -14,7 +14,7 @@ import lombok.Setter;
  */
 @AllArgsConstructor
 @Getter
-public enum MemberLevelEnum implements BaseEnum {
+public enum MemberLevel implements BaseEnum {
 	GENERAL("General"), VERIFIED1("Verified1");
 
 	@Setter

@@ -2,6 +2,7 @@ package io.aext.core.service.controller;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,13 +22,14 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.aext.core.base.constant.CommonStatus;
-import io.aext.core.base.constant.MemberLevelEnum;
+import io.aext.core.base.constant.MemberLevel;
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.entity.Member;
 import io.aext.core.base.service.LocaleMessageSourceService;
@@ -100,7 +102,7 @@ public class MemberController extends BaseController {
 
 		// Read cache
 		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVE_CODE_PREFIX + register.getEmail()))
+		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVE_CODE_PREFIX + register.getUsername()))
 				.orElse("N");
 		if (!cache.toString().equals("N")) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -113,26 +115,26 @@ public class MemberController extends BaseController {
 		member.setPassword(passwordEncoder.encode(register.getPassword()));
 		member.setEmail(register.getEmail());
 		member.setRegistTime(Instant.now());
-		member.setMemberLevel(MemberLevelEnum.GENERAL);
-		member.setCommonStatus(CommonStatus.NORMAL);
+		member.setMemberLevel(EnumSet.of(MemberLevel.GENERAL));
+		member.setCommonStatus(EnumSet.of(CommonStatus.NORMAL));
 		memberService.save(member);
 
 		// Confirmation Mail
-		String code = SHA2.getSHA512Short(0, 8).toUpperCase();
+		String token = SHA2.getSHA512Short(0, 8).toUpperCase();
 
-		URI locationConfirm = ServletUriComponentsBuilder
-				.fromUriString(serviceProperty.getFrontDomain() + serviceProperty.getFrontConfirm() + "/" + code)
-				.buildAndExpand().encode().toUri();
+		URI locationConfirm = ServletUriComponentsBuilder.fromUriString(serviceProperty.getFrontDomain())
+				.path(serviceProperty.getFrontConfirm()).query("name={name}&token={token}")
+				.buildAndExpand(register.getUsername(), token).encode().toUri();
 
 		if (serviceProperty.isDev()) {
 			String path = getRequestMappingPath("registerConfirmEmail(");
-			locationConfirm = ServletUriComponentsBuilder.fromCurrentContextPath().path(path).buildAndExpand(code)
-					.encode().toUri();
+			locationConfirm = ServletUriComponentsBuilder.fromCurrentContextPath().path(path)
+					.query("name={name}&token={token}").buildAndExpand(register.getUsername(), token).encode().toUri();
 		}
 
 		// Send Mail
 		String subject = localeMessageSourceService.getMessage("EMAIL_ACTIVATION_CONFIRM_TITLE");
-		String[] mailList = { member.getEmail() };
+		String[] mailList = { register.getEmail() };
 		MCActiveConfirm content = new MCActiveConfirm();
 		content.setSubject(subject);
 		content.setConfirmUrl(locationConfirm.toString());
@@ -142,13 +144,32 @@ public class MemberController extends BaseController {
 					serviceProperty.getCompany(), subject, mailContent.get());
 		}
 
-		valueOperations.set(EMAIL_ACTIVE_CODE_PREFIX + member.getEmail(), code, 10, TimeUnit.MINUTES);
+		valueOperations.set(EMAIL_ACTIVE_CODE_PREFIX + register.getUsername(), token, 10, TimeUnit.MINUTES);
 
 		return success(localeMessageSourceService.getMessage("SEND_REGISTER_EMAIL_SUCCESS"));
 	}
 
-	@RequestMapping(value = { "/register/confirm/email/{token}" }, method = { RequestMethod.GET })
-	public ResponseEntity<?> registerConfirmEmail(@Valid @PathVariable("token") String token) {
+	@RequestMapping(value = { "/register/confirm/email" }, method = { RequestMethod.GET })
+	public ResponseEntity<?> registerConfirmEmail(
+			@Valid @RequestParam(value = "username", required = true) String username,
+			@Valid @RequestParam(value = "token", required = true) String token) {
+		// Read cache
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVE_CODE_PREFIX + username)).orElse("N");
+		if (cache.toString().equals("N") || !cache.toString().equals(token)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					localeMessageSourceService.getMessage("INVALID_LINK"));
+		}
+
+		Optional<Member> member = memberService.findByUsername(username);
+		if (!member.isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					localeMessageSourceService.getMessage("INVALID_LINK"));
+		}
+
+		member.get().getMemberLevel().add(MemberLevel.VERIFIED1);
+		memberService.save(member.get());
+
 		return success();
 	}
 
