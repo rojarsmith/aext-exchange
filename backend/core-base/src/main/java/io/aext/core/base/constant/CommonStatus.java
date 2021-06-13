@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import io.aext.core.base.BaseEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author rojar
@@ -15,21 +14,14 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 public enum CommonStatus implements BaseEnum {
-	/**
-	 * Normal
-	 */
-	NORMAL("Normal"),
 	/*
 	 * Can login but can not exchange.
 	 */
-	SUSPICIOUS("Suspicious"),
+	SUSPICIOUS,
 	/**
 	 * Can not login
 	 */
-	ILLEGAL("Illegal");
-
-	@Setter
-	private String name;
+	ILLEGAL;
 
 	@Override
 	@JsonValue

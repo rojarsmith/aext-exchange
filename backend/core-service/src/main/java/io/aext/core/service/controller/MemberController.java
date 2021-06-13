@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -115,8 +114,8 @@ public class MemberController extends BaseController {
 		member.setPassword(passwordEncoder.encode(register.getPassword()));
 		member.setEmail(register.getEmail());
 		member.setRegistTime(Instant.now());
-		member.setMemberLevel(EnumSet.of(MemberLevel.GENERAL));
-		member.setCommonStatus(EnumSet.of(CommonStatus.NORMAL));
+		member.setMemberLevel(EnumSet.of(MemberLevel.REGISTERD));
+		member.setCommonStatus(EnumSet.noneOf(CommonStatus.class));
 		memberService.save(member);
 
 		// Confirmation Mail
@@ -167,8 +166,10 @@ public class MemberController extends BaseController {
 					localeMessageSourceService.getMessage("INVALID_LINK"));
 		}
 
-		member.get().getMemberLevel().add(MemberLevel.VERIFIED1);
+		member.get().getMemberLevel().add(MemberLevel.VERIFIED_EMAIL);
 		memberService.save(member.get());
+
+		valueOperations.getOperations().delete(EMAIL_ACTIVE_CODE_PREFIX + username);
 
 		return success();
 	}

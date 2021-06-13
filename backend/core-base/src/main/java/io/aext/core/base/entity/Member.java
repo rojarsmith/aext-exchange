@@ -64,7 +64,7 @@ public class Member {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Instant registTime;
 
-	private EnumSet<MemberLevel> memberLevel = EnumSet.of(MemberLevel.GENERAL);
+	private EnumSet<MemberLevel> memberLevel = EnumSet.of(MemberLevel.REGISTERD);
 
-	private EnumSet<CommonStatus> commonStatus = EnumSet.of(CommonStatus.NORMAL);
+	private EnumSet<CommonStatus> commonStatus = EnumSet.noneOf(CommonStatus.class);
 }

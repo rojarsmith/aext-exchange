@@ -1,9 +1,7 @@
 package io.aext.core.base.config;
 
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -16,18 +14,6 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
  */
 @Configuration
 public class ThymeleafConfig {
-//    @Bean(name = "messageSource")
-//    public MessageSource messageSource() {
-//
-//        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-//        messageSource.setBasename("/lang/messages");
-//        messageSource.setFallbackToSystemLocale(false);
-//        messageSource.setCacheSeconds(0);
-//        messageSource.setDefaultEncoding("UTF-8");
-//
-//        return messageSource;
-//    }
-    
 	@Bean
 	public ClassLoaderTemplateResolver thymeleafTemplateResolver() {
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();

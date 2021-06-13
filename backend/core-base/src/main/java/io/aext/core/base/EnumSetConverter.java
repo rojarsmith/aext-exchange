@@ -5,8 +5,6 @@ import java.util.Iterator;
 
 import javax.persistence.AttributeConverter;
 
-import io.aext.core.base.constant.MemberLevel;
-
 /**
  * @author rojar
  *
@@ -22,7 +20,7 @@ public class EnumSetConverter<E extends Enum<E>> implements AttributeConverter<E
 
 	@Override
 	public String convertToDatabaseColumn(EnumSet<E> attribute) {
-		if (attribute == null) {
+		if (attribute == null || attribute.isEmpty()) {
 			return null;
 		}
 

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import io.aext.core.base.BaseEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author rojar
@@ -15,11 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 public enum MemberLevel implements BaseEnum {
-	GENERAL("General"), VERIFIED1("Verified1");
+	REGISTERD, VERIFIED_EMAIL;
 
-	@Setter
-	private String name;
-	
 	@Override
 	@JsonValue
 	public int getOrdinal() {
