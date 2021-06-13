@@ -1,0 +1,61 @@
+package io.aext.core.base;
+
+import java.util.EnumSet;
+import java.util.Iterator;
+
+import javax.persistence.AttributeConverter;
+
+import io.aext.core.base.constant.MemberLevelEnum;
+
+/**
+ * @author rojar
+ *
+ * @date 2021-06-13
+ */
+public class EnumSetConverter<E extends Enum<E>> implements AttributeConverter<EnumSet<E>, String> {
+
+	private final Class<E> clazz;
+
+	@SuppressWarnings("unchecked")
+	public EnumSetConverter(Class<MemberLevelEnum> clazz) {
+		this.clazz = (Class<E>) clazz;
+	}
+
+	@Override
+	public String convertToDatabaseColumn(EnumSet<E> attribute) {
+		if (attribute == null) {
+			return null;
+		}
+
+		String data = "";
+		Iterator<E> i = attribute.iterator();
+		while (i.hasNext()) {
+			data += i.next().toString() + ",";
+		}
+
+		data = data.substring(0, data.length() - 1);
+
+		return data;
+	}
+
+	@Override
+	public EnumSet<E> convertToEntityAttribute(String dbData) {
+		if (dbData == null || dbData.isEmpty()) {
+			return null;
+		}
+
+		String[] pieces = dbData.split(",");
+		if (pieces == null || pieces.length == 0) {
+			return null;
+		}
+
+		EnumSet<E> data = EnumSet.noneOf(clazz);
+		for (int i = 0; i < pieces.length; i++) {
+			E item = (E) Enum.valueOf(clazz, pieces[i]);
+			data.add(item);
+		}
+
+		return data;
+	}
+
+}
