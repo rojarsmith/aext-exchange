@@ -16,6 +16,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
@@ -39,6 +43,7 @@ import io.aext.core.base.service.email.MailContentBuilder;
 import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.ServiceProperty;
+import io.aext.core.service.payload.Login;
 import io.aext.core.service.payload.Register;
 
 import static io.aext.core.base.constant.SysConstant.*;
@@ -71,6 +76,9 @@ public class MemberController extends BaseController {
 
 	@Autowired
 	MailContentBuilder mailContentBuilder;
+
+	@Autowired
+	AuthenticationManager authenticationManager;
 
 	/**
 	 * Register by email.
@@ -221,4 +229,29 @@ public class MemberController extends BaseController {
 		}
 	}
 
+	@RequestMapping("/login")
+	@ResponseBody
+	public ResponseEntity<?> loginEmail(@Valid Login login, BindingResult bindingResult) {
+
+		Optional<Member> member = memberService.findByUsername(login.getUsername());
+		if (member.isEmpty() || !passwordEncoder.matches(login.getPassword(), member.get().getPassword())) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					localeMessageSourceService.getMessage("LOGIN_FAILED"));
+		}
+		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(),
+				login.getPassword());
+		Authentication authentication = authenticationManager.authenticate(token);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+//		MemberDetails memberDetails = new MemberDetails(member.get().getId(), member.get().getUsername(),
+//				member.get().getEmail(), member.get().getPassword(), true, null);
+		return success("OK", authentication);
+	}
+	@RequestMapping("/test")
+	@ResponseBody
+	public ResponseEntity<?> test() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		authentication.getPrincipal();
+		return success("OK", authentication);
+	}
 }

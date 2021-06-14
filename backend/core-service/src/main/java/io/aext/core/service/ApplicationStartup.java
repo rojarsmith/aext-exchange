@@ -34,7 +34,7 @@ public class ApplicationStartup implements ApplicationRunner {
 		if (serviceProperty.isDev()) {
 			// Creating user's account
 			Member member = new Member();
-			member.setUsername("service");
+			member.setUsername("dev");
 			member.setPassword(passwordEncoder.encode("11112222"));
 			member.setEmail("service@aext.io");
 			member.setRegistTime(Instant.now());
