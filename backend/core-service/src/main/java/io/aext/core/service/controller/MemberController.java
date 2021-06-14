@@ -238,8 +238,7 @@ public class MemberController extends BaseController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					localeMessageSourceService.getMessage("LOGIN_FAILED"));
 		}
-		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(),
-				login.getPassword());
+		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword());
 		Authentication authentication = authenticationManager.authenticate(token);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -247,6 +246,14 @@ public class MemberController extends BaseController {
 //				member.get().getEmail(), member.get().getPassword(), true, null);
 		return success("OK", authentication);
 	}
+
+	@RequestMapping("/logout")
+	@ResponseBody
+	public ResponseEntity<?> logout() {
+		SecurityContextHolder.clearContext();
+		return success("OK");
+	}
+
 	@RequestMapping("/test")
 	@ResponseBody
 	public ResponseEntity<?> test() {
