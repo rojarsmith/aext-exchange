@@ -7,9 +7,12 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import io.aext.core.service.security.LoginFilter;
 import io.aext.core.service.security.UserDetailsServiceImpl;
 
 /**
@@ -21,6 +24,9 @@ import io.aext.core.service.security.UserDetailsServiceImpl;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private UserDetailsServiceImpl userDetailsService;
+
+	@Autowired
+	private LoginFilter loginFilter;
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -34,10 +40,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				//
 				.antMatchers("/api/v1/member/login").permitAll()
 				//
+				.antMatchers("/api/v1/member/logout").permitAll()
+				//
 				.antMatchers("/api/v1/member/test").permitAll()
 				//
 				.anyRequest().authenticated();
-//		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		http.addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 
 //	@Override

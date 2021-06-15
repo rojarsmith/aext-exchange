@@ -45,6 +45,9 @@ import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.ServiceProperty;
 import io.aext.core.service.payload.Login;
 import io.aext.core.service.payload.Register;
+import io.aext.core.service.security.JwtManager;
+import io.aext.core.service.security.MemberDetails;
+import io.aext.core.service.vo.MemberVO;
 
 import static io.aext.core.base.constant.SysConstant.*;
 
@@ -79,7 +82,10 @@ public class MemberController extends BaseController {
 
 	@Autowired
 	AuthenticationManager authenticationManager;
-
+	
+    @Autowired
+    private JwtManager jwtManager;
+    
 	/**
 	 * Register by email.
 	 */
@@ -233,18 +239,39 @@ public class MemberController extends BaseController {
 	@ResponseBody
 	public ResponseEntity<?> loginEmail(@Valid Login login, BindingResult bindingResult) {
 
-		Optional<Member> member = memberService.findByUsername(login.getUsername());
-		if (member.isEmpty() || !passwordEncoder.matches(login.getPassword(), member.get().getPassword())) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("LOGIN_FAILED"));
-		}
-		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword());
-		Authentication authentication = authenticationManager.authenticate(token);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+//		Optional<Member> member = memberService.findByUsername(login.getUsername());
+//		if (member.isEmpty() || !passwordEncoder.matches(login.getPassword(), member.get().getPassword())) {
+//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+//					localeMessageSourceService.getMessage("LOGIN_FAILED"));
+//		}
+//		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword());
+//		Authentication authentication = authenticationManager.authenticate(token);
+//		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 //		MemberDetails memberDetails = new MemberDetails(member.get().getId(), member.get().getUsername(),
 //				member.get().getEmail(), member.get().getPassword(), true, null);
-		return success("OK", authentication);
+		
+				
+
+//		return success("OK", authentication);
+		
+		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword());
+		Authentication authentication = authenticationManager.authenticate(token);
+		MemberDetails member = (MemberDetails)authentication.getPrincipal();
+		
+		// Jwt
+//		SecurityContextHolder.getContext().setAuthentication(authentication);	
+
+		MemberVO memberVO = new MemberVO();
+		memberVO.setId(member.getUserid())
+		//
+		.setUsername(member.getUsername())
+		//
+		.setToken(jwtManager.generate(member.getUsername()))
+	    //
+		.setResourceIds(null);
+		
+		return success("ok", memberVO);
 	}
 
 	@RequestMapping("/logout")
