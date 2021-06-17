@@ -10,8 +10,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import io.aext.core.service.security.AccessDeniedHandlerImpl;
+import io.aext.core.service.security.AuthFilter;
 import io.aext.core.service.security.LoginFilter;
 import io.aext.core.service.security.UserDetailsServiceImpl;
 
@@ -27,6 +30,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private LoginFilter loginFilter;
+
+	@Autowired
+	private AuthFilter authFilter;
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -44,9 +50,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				//
 				.antMatchers("/api/v1/member/test").permitAll()
 				//
-				.anyRequest().authenticated();
+				.antMatchers("/api/v1/member/test2").permitAll()
+				//
+				.anyRequest().authenticated()
+				//
+				.and().exceptionHandling().accessDeniedHandler(new AccessDeniedHandlerImpl());
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		// Authentication filters.
 		http.addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(authFilter, FilterSecurityInterceptor.class);
 	}
 
 //	@Override

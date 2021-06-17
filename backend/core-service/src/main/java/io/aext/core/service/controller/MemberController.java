@@ -23,6 +23,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,6 +48,7 @@ import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.ServiceProperty;
 import io.aext.core.service.payload.Login;
 import io.aext.core.service.payload.Register;
+import io.aext.core.service.security.Auth;
 import io.aext.core.service.security.JwtManager;
 import io.aext.core.service.security.MemberDetails;
 import io.aext.core.service.vo.MemberVO;
@@ -58,6 +62,7 @@ import static io.aext.core.base.constant.SysConstant.*;
  */
 @RestController
 @RequestMapping(value = { "/api/v1/member" })
+@Auth(id = 1000, name = "member")
 public class MemberController extends BaseController {
 	@Autowired
 	ServiceProperty serviceProperty;
@@ -82,10 +87,10 @@ public class MemberController extends BaseController {
 
 	@Autowired
 	AuthenticationManager authenticationManager;
-	
-    @Autowired
-    private JwtManager jwtManager;
-    
+
+	@Autowired
+	private JwtManager jwtManager;
+
 	/**
 	 * Register by email.
 	 */
@@ -250,27 +255,25 @@ public class MemberController extends BaseController {
 
 //		MemberDetails memberDetails = new MemberDetails(member.get().getId(), member.get().getUsername(),
 //				member.get().getEmail(), member.get().getPassword(), true, null);
-		
-				
 
 //		return success("OK", authentication);
-		
+
 		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword());
 		Authentication authentication = authenticationManager.authenticate(token);
-		MemberDetails member = (MemberDetails)authentication.getPrincipal();
-		
+		MemberDetails member = (MemberDetails) authentication.getPrincipal();
+
 		// Jwt
 //		SecurityContextHolder.getContext().setAuthentication(authentication);	
 
 		MemberVO memberVO = new MemberVO();
 		memberVO.setId(member.getUserid())
-		//
-		.setUsername(member.getUsername())
-		//
-		.setToken(jwtManager.generate(member.getUsername()))
-	    //
-		.setResourceIds(null);
-		
+				//
+				.setUsername(member.getUsername())
+				//
+				.setToken(jwtManager.generate(member.getUsername()))
+				//
+				.setResourceIds(null);
+
 		return success("ok", memberVO);
 	}
 
@@ -281,9 +284,21 @@ public class MemberController extends BaseController {
 		return success("OK");
 	}
 
-	@RequestMapping("/test")
+//	@GetMapping("/test")
 	@ResponseBody
+	@PutMapping("/test")
+	@Auth(id = 1, name = "create new user")
 	public ResponseEntity<?> test() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		authentication.getPrincipal();
+		return success("OK", authentication);
+	}
+
+	@GetMapping("/test2")
+	@ResponseBody
+	@DeleteMapping
+	@Auth(id = 2, name = "delete the user")
+	public ResponseEntity<?> test2() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		authentication.getPrincipal();
 		return success("OK", authentication);

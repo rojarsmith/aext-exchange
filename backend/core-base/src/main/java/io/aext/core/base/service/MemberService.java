@@ -16,7 +16,7 @@ import io.aext.core.base.entity.Member;
 @Service
 public class MemberService extends BaseService<MemberService> {
 	@Autowired
-	private MemberDao memberDao;
+	MemberDao memberDao;
 
 	public Optional<Member> findByUsername(String username) {
 		return memberDao.findByUsername(username);

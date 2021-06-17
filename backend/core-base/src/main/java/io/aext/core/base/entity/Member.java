@@ -2,12 +2,15 @@ package io.aext.core.base.entity;
 
 import java.time.Instant;
 import java.util.EnumSet;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -59,4 +62,7 @@ public class Member {
 
 	@Column(name = "status")
 	private EnumSet<MemberStatus> memberLevel = EnumSet.noneOf(MemberStatus.class);
+
+	@ManyToMany(targetEntity = Role.class, fetch = FetchType.EAGER)
+	private List<Role> roleList;
 }

@@ -35,7 +35,8 @@ jar {
 
 ext {
     queryDslVersion = '4.4.0'
-    javaGeneratedSources = file("$projectDir/build/generated/sources/annotationProcessor/java/main/io/aext/core/base/entity")
+          javaGeneratedSources = file("$projectDir/build/generated/sources/annotationProcessor/java/main/io/aext/core/base/entity")
+//    C:\my\Coin\aext\aext-exchange\backend\core-base\build\generated\sources\annotationProcessor\java\main\io\aext\core\base\entity\io\aext\core\base\entity
 }
 
 compileJava {

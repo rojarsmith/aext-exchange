@@ -1,18 +1,23 @@
 package io.aext.core.service.security;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import io.aext.core.base.entity.Member;
+import io.aext.core.base.entity.Permission;
+import io.aext.core.base.entity.Role;
 import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
+import io.aext.core.base.service.PermissionService;
 
 /**
  * @author rojar
@@ -27,6 +32,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Autowired
 	MemberService memberService;
 
+	@Autowired
+	PermissionService permissionService;
+
 	@Override
 	public UserDetails loadUserByUsername(String username) {
 		Optional<Member> member = memberService.findByUsername(username);
@@ -34,6 +42,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					localeMessageSourceService.getMessage("MEMBER_NOT_EXISTS"));
 		}
+
+		Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+		for (Role role : member.get().getRoleList()) {
+			SimpleGrantedAuthority sga = new SimpleGrantedAuthority(role.getCode());
+			authorities.add(sga);
+
+			for (Permission r : role.getPermissionList()) {
+				authorities.add(new SimpleGrantedAuthority(r.getId().toString()));
+			}
+		}
+
 		return new MemberDetails(
 				//
 				member.get().getId(),
@@ -42,7 +61,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 				//
 				member.get().getEmail(),
 				//
-				member.get().getPassword(), true, Collections.emptyList());
+				member.get().getPassword(), true, authorities);
 	}
 
 }
