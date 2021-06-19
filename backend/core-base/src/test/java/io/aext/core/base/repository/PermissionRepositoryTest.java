@@ -56,5 +56,9 @@ public class PermissionRepositoryTest {
 		assertEquals(true, q1.isPresent());
 		List<Permission> q2 = permissionRepository.findAllById(Arrays.asList(1001L, 1002L));
 		assertEquals(2, q2.size());
+		List<Permission> q3 = permissionRepository.findById(1001L, 1001L);
+		assertEquals(1, q3.size());
+		List<Permission> q4 = permissionRepository.findByIdGreaterThanEqualAndIdLessThanEqual(1001L, 1002L);
+		assertEquals(2, q4.size());
 	}
 }
