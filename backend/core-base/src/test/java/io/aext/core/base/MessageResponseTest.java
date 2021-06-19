@@ -4,13 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import io.aext.core.base.payload.MessageResponse;
+import io.aext.core.base.model.vo.ResultVO;
 
 public class MessageResponseTest {
 	@Test
 	public void commonTest() {
-		MessageResponse mr1 = new MessageResponse("OK");
+		ResultVO<Object> mr1 = new ResultVO<Object>("OK");
 		String json1 = mr1.toString();
-		assertEquals("{\"message\":\"OK\",\"data\":null,\"totalPage\":0,\"totalElement\":0}", json1);
+		assertEquals("{\"message\":\"OK\",\"data\":null}", json1);
 	}
 }

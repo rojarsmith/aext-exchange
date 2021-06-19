@@ -15,7 +15,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import io.aext.core.base.payload.MessageResponse;
+import io.aext.core.base.model.vo.ResultVO;
 
 public class BaseController {
 	@Autowired
@@ -61,7 +61,7 @@ public class BaseController {
 	}
 
 	protected ResponseEntity<?> success(String msg, Object obj) {
-		return ResponseEntity.ok().body(new MessageResponse(msg, obj));
+		return ResponseEntity.ok().body(new ResultVO<Object>(msg, obj));
 	}
 
 	protected ResponseEntity<?> error(String msg) {
@@ -69,6 +69,6 @@ public class BaseController {
 	}
 
 	protected ResponseEntity<?> error(String msg, Object obj) {
-		return ResponseEntity.badRequest().body(new MessageResponse(msg, obj));
+		return ResponseEntity.badRequest().body(new ResultVO<Object>(msg, obj));
 	}
 }
