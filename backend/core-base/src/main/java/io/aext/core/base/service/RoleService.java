@@ -3,8 +3,8 @@ package io.aext.core.base.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import io.aext.core.base.dao.RoleDao;
-import io.aext.core.base.entity.Role;
+import io.aext.core.base.model.entity.Role;
+import io.aext.core.base.repository.RoleRepository;
 
 /**
  * @author rojar
@@ -14,7 +14,7 @@ import io.aext.core.base.entity.Role;
 @Service
 public class RoleService extends BaseService<RoleService> {
 	@Autowired
-	RoleDao roleDao;
+	RoleRepository roleDao;
 
 	public Role save(Role role) {
 		return roleDao.save(role);

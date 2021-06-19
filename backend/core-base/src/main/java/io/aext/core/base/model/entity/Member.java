@@ -1,4 +1,4 @@
-package io.aext.core.base.entity;
+package io.aext.core.base.model.entity;
 
 import java.time.Instant;
 import java.util.EnumSet;

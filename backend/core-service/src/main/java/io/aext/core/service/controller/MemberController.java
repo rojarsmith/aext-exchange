@@ -36,7 +36,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.aext.core.base.constant.MemberStatus;
 import io.aext.core.base.controller.BaseController;
-import io.aext.core.base.entity.Member;
+import io.aext.core.base.model.entity.Member;
 import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
 import io.aext.core.base.service.email.EmailSenderService;

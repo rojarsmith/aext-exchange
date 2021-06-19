@@ -5,8 +5,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import io.aext.core.base.dao.MemberDao;
-import io.aext.core.base.entity.Member;
+import io.aext.core.base.model.entity.Member;
+import io.aext.core.base.repository.MemberRepository;
 
 /**
  * @author rojar
@@ -16,7 +16,7 @@ import io.aext.core.base.entity.Member;
 @Service
 public class MemberService extends BaseService<MemberService> {
 	@Autowired
-	MemberDao memberDao;
+	MemberRepository memberDao;
 
 	public Optional<Member> findByUsername(String username) {
 		return memberDao.findByUsername(username);

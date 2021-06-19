@@ -21,9 +21,9 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMappi
 
 import io.aext.core.base.constant.MemberStatus;
 import io.aext.core.base.constant.ResourceType;
-import io.aext.core.base.entity.Member;
-import io.aext.core.base.entity.Role;
+import io.aext.core.base.model.entity.Member;
 import io.aext.core.base.model.entity.Permission;
+import io.aext.core.base.model.entity.Role;
 import io.aext.core.base.service.MemberService;
 import io.aext.core.base.service.PermissionService;
 import io.aext.core.base.service.RoleService;

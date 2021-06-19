@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import io.aext.core.base.entity.Member;
+import io.aext.core.base.model.entity.Member;
 import io.aext.core.base.service.MemberService;
 
 /**

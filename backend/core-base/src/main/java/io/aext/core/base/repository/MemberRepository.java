@@ -1,17 +1,19 @@
-package io.aext.core.base.dao;
+package io.aext.core.base.repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import io.aext.core.base.entity.Member;
-import io.aext.core.base.repository.BaseRepository;
+import org.springframework.stereotype.Repository;
+
+import io.aext.core.base.model.entity.Member;
 
 /**
  * @author rojar
  *
- * @date 2021-06-06
+ * @date 2021-06-19
  */
-public interface MemberDao extends BaseRepository<Member> {
+@Repository
+public interface MemberRepository extends BaseRepository<Member> {
 	List<Member> getAllByEmailEquals(String email);
 
 	List<Member> getAllByUsernameEquals(String username);

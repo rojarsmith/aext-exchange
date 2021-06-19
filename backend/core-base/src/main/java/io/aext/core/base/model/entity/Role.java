@@ -1,4 +1,4 @@
-package io.aext.core.base.entity;
+package io.aext.core.base.model.entity;
 
 import java.io.Serializable;
 import java.util.List;
@@ -13,7 +13,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-import io.aext.core.base.model.entity.Permission;
 import lombok.Data;
 
 /**
