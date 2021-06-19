@@ -14,7 +14,7 @@ import io.aext.core.base.repository.MemberRepository;
  * @date 2021-06-19
  */
 @Service
-public class MemberService extends BaseService<MemberService> {
+public class MemberService  {
 	@Autowired
 	MemberRepository memberRepository;
 

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.aext.core.base.model.entity.Member;
 import io.aext.core.base.service.MemberService;
@@ -28,22 +29,23 @@ public class MemberServiceTest {
 	@Autowired
 	MemberService memberService;
 
-	@PostConstruct
-	void init() {
-		Member m1 = new Member();
-		m1.setEmail("rojarsmith@gmail.com");
-		m1.setUsername("Rojar");
-		m1.setPassword("abc");
-		memberService.save(m1);
-
-		Member m2 = new Member();
-		m2.setEmail("dev@aext.io");
-		m2.setUsername("Dev かいはつ");
-		m2.setPassword("abc");
-		memberService.save(m2);
-	}
+//	@PostConstruct
+//	void init() {
+//		Member m1 = new Member();
+//		m1.setEmail("rojarsmith@gmail.com");
+//		m1.setUsername("Rojar");
+//		m1.setPassword("abc");
+//		memberService.save(m1);
+//
+//		Member m2 = new Member();
+//		m2.setEmail("dev@aext.io");
+//		m2.setUsername("Dev かいはつ");
+//		m2.setPassword("abc");
+//		memberService.save(m2);
+//	}
 
 	@Test
+	@Transactional
 	public void commonTest() {
 		boolean isEmailExist = memberService.isEmailExist("");
 		assertEquals(isEmailExist, false);

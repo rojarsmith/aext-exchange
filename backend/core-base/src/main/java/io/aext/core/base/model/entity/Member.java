@@ -63,6 +63,6 @@ public class Member {
 	@Column(name = "status")
 	private EnumSet<MemberStatus> memberLevel = EnumSet.noneOf(MemberStatus.class);
 
-	@ManyToMany(targetEntity = Role.class, fetch = FetchType.EAGER)
+	@ManyToMany(targetEntity = Role.class, fetch = FetchType.LAZY)
 	private List<Role> roleList;
 }

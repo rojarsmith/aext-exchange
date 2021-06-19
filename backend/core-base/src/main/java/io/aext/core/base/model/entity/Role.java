@@ -44,7 +44,7 @@ public class Role implements Serializable {
 	/**
 	 * Role's permission
 	 */
-	@ManyToMany(targetEntity = Permission.class, fetch = FetchType.EAGER)
+	@ManyToMany(targetEntity = Permission.class, fetch = FetchType.LAZY)
 	private List<Permission> permissionList;
 
 	public Role() {

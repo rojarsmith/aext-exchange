@@ -12,7 +12,7 @@ import io.aext.core.base.repository.RoleRepository;
  * @date 2021-06-19
  */
 @Service
-public class RoleService extends BaseService<RoleService> {
+public class RoleService  {
 	@Autowired
 	RoleRepository roleRepository;
 

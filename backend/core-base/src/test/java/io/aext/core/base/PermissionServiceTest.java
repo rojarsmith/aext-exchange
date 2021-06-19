@@ -1,4 +1,4 @@
-package io.aext.core.base.repository;
+package io.aext.core.base;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,14 +12,17 @@ import javax.annotation.PostConstruct;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.aext.core.base.enums.ResourceType;
+import io.aext.core.base.model.entity.Member;
 import io.aext.core.base.model.entity.Permission;
+import io.aext.core.base.model.entity.Role;
+import io.aext.core.base.service.MemberService;
+import io.aext.core.base.service.PermissionService;
+import io.aext.core.base.service.RoleService;
 
 /**
  * @author rojar
@@ -28,9 +31,15 @@ import io.aext.core.base.model.entity.Permission;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration({ "classpath:spring-service.xml" })
-public class PermissionRepositoryTest {
+public class PermissionServiceTest {
 	@Autowired
-	PermissionRepository permissionRepository;
+	MemberService memberService;
+
+	@Autowired
+	RoleService roleService;
+
+	@Autowired
+	PermissionService permissionService;
 
 	@PostConstruct
 	void init() {
@@ -51,7 +60,7 @@ public class PermissionRepositoryTest {
 				.setPath("DELETE:/api/v1/member/test2")
 				//
 				.setType(ResourceType.API);
-		permissionRepository.saveAll(Arrays.asList(p1, p2));
+		permissionService.save(Arrays.asList(p1, p2));
 
 		List<Permission> ps1 = new ArrayList<>();
 		for (int i = 1; i <= 99; i++) {
@@ -66,26 +75,31 @@ public class PermissionRepositoryTest {
 
 			ps1.add(p);
 		}
-		permissionRepository.saveAll(ps1);
+		permissionService.save(ps1);
+
+		Role role = new Role("ROLE_ADMIN", "Admin", Arrays.asList(p1, p2));
+		roleService.save(role);
+
+		Member m1 = new Member();
+		m1.setEmail("rojarsmith@gmail.com");
+		m1.setUsername("Rojar");
+		m1.setPassword("abc");
+		m1.setRoleList(Arrays.asList(role));
+		memberService.save(m1);
+
+		Member m2 = new Member();
+		m2.setEmail("dev@aext.io");
+		m2.setUsername("Dev かいはつ");
+		m2.setPassword("abc");
+		m2.setRoleList(Arrays.asList(role));
+		memberService.save(m2);
 	}
 
 	@Test
+	@Transactional
 	public void commonTest() {
-		Optional<Permission> q1 = permissionRepository.findById(1001L);
-		assertEquals(true, q1.isPresent());
-		List<Permission> q2 = permissionRepository.findAllById(Arrays.asList(1001L, 1002L));
-		assertEquals(2, q2.size());
-		List<Permission> q3 = permissionRepository.findById(1001L, 1001L);
-		assertEquals(1, q3.size());
-		List<Permission> q4 = permissionRepository.findByIdGreaterThanEqualAndIdLessThanEqual(1001L, 1002L);
-		assertEquals(2, q4.size());
-	}
-
-	@Test
-	public void pageTest() {
-		Page<Permission> pageResult = permissionRepository.findAll(PageRequest.of(1, 5, Sort.by("id").descending()));
-
-		List<Permission> permissions = pageResult.getContent();
-		assertEquals(5, permissions.size());
+		Optional<Member> member = memberService.findByUsername("Rojar");
+		List<Permission> permissions = permissionService.getIdsByUserId(member.get().getId());
+		assertEquals(2, permissions.size());
 	}
 }

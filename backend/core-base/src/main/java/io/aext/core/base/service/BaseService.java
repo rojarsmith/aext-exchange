@@ -8,5 +8,5 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @date 2021-06-19
  */
 @NoRepositoryBean
-public class BaseService<T> {
+public interface BaseService<T> {
 }
