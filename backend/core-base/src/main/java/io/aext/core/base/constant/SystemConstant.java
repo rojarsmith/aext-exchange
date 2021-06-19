@@ -5,7 +5,7 @@ package io.aext.core.base.constant;
  *
  * @date 2021-06-06
  */
-public class SysConstant {
+public class SystemConstant {
 	/**
 	 * Verify code
 	 */

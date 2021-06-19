@@ -9,14 +9,14 @@ import io.aext.core.base.repository.RoleRepository;
 /**
  * @author rojar
  *
- * @date 2021-06-16
+ * @date 2021-06-19
  */
 @Service
 public class RoleService extends BaseService<RoleService> {
 	@Autowired
-	RoleRepository roleDao;
+	RoleRepository roleRepository;
 
 	public Role save(Role role) {
-		return roleDao.save(role);
+		return roleRepository.save(role);
 	}
 }

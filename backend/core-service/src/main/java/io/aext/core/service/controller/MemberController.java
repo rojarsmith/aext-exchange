@@ -1,5 +1,7 @@
 package io.aext.core.service.controller;
 
+import static io.aext.core.base.constant.SystemConstant.*;
+
 import java.net.URI;
 import java.time.Instant;
 import java.util.EnumSet;
@@ -34,8 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import io.aext.core.base.constant.MemberStatus;
 import io.aext.core.base.controller.BaseController;
+import io.aext.core.base.enums.MemberStatus;
 import io.aext.core.base.model.entity.Member;
 import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
@@ -52,8 +54,6 @@ import io.aext.core.service.security.Auth;
 import io.aext.core.service.security.JwtManager;
 import io.aext.core.service.security.MemberDetails;
 import io.aext.core.service.vo.MemberVO;
-
-import static io.aext.core.base.constant.SysConstant.*;
 
 /**
  * @author Rojar Smith

@@ -1,4 +1,4 @@
-package io.aext.core.base;
+package io.aext.core.base.model.entity.convert;
 
 import java.util.EnumSet;
 import java.util.Iterator;

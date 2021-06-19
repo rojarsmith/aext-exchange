@@ -1,4 +1,4 @@
-package io.aext.core.base;
+package io.aext.core.base.enums;
 
 /**
  * @author rojar

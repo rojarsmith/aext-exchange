@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import io.aext.core.base.constant.ResourceType;
+import io.aext.core.base.enums.ResourceType;
 import io.aext.core.base.model.entity.Permission;
 import io.aext.core.base.repository.PermissionRepository;
 

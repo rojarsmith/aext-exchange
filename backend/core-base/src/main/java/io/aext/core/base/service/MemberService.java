@@ -11,30 +11,30 @@ import io.aext.core.base.repository.MemberRepository;
 /**
  * @author rojar
  *
- * @date 2021-06-06
+ * @date 2021-06-19
  */
 @Service
 public class MemberService extends BaseService<MemberService> {
 	@Autowired
-	MemberRepository memberDao;
+	MemberRepository memberRepository;
 
 	public Optional<Member> findByUsername(String username) {
-		return memberDao.findByUsername(username);
+		return memberRepository.findByUsername(username);
 	}
 
 	public Optional<Member> findByEmail(String email) {
-		return memberDao.findMemberByEmail(email);
+		return memberRepository.findMemberByEmail(email);
 	}
 
 	public boolean isEmailExist(String email) {
-		return memberDao.getAllByEmailEquals(email).size() > 0 ? true : false;
+		return memberRepository.getAllByEmailEquals(email).size() > 0 ? true : false;
 	}
 
 	public boolean isUsernameExist(String username) {
-		return memberDao.getAllByUsernameEquals(username).size() > 0 ? true : false;
+		return memberRepository.getAllByUsernameEquals(username).size() > 0 ? true : false;
 	}
 
 	public Member save(Member member) {
-		return memberDao.save(member);
+		return memberRepository.save(member);
 	}
 }

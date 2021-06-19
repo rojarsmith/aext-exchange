@@ -25,7 +25,7 @@ public class ExceptionController {
 		log.error("'handleResponseStatusException':", e);
 		Map<String, Object> data = new HashMap<>();
 		data.put("stackTrace", e.getStackTrace());
-		return ResponseEntity.badRequest().body(new ResultVO(e.getReason(), data));
+		return ResponseEntity.badRequest().body(new ResultVO<Map<String, Object>>(e.getReason(), data));
 	}
 
 	@ExceptionHandler(value = { Exception.class })
@@ -33,6 +33,6 @@ public class ExceptionController {
 		log.error("'handleException':", e);
 		Map<String, Object> data = new HashMap<>();
 		data.put("stackTrace", e.getStackTrace());
-		return ResponseEntity.badRequest().body(new ResultVO(e.getMessage(), data));
+		return ResponseEntity.badRequest().body(new ResultVO<Map<String, Object>>(e.getMessage(), data));
 	}
 }

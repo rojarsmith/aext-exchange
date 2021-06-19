@@ -19,8 +19,8 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 
-import io.aext.core.base.constant.MemberStatus;
-import io.aext.core.base.constant.ResourceType;
+import io.aext.core.base.enums.MemberStatus;
+import io.aext.core.base.enums.ResourceType;
 import io.aext.core.base.model.entity.Member;
 import io.aext.core.base.model.entity.Permission;
 import io.aext.core.base.model.entity.Role;

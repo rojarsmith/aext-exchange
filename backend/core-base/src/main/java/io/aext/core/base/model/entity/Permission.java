@@ -10,7 +10,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import io.aext.core.base.constant.ResourceType;
+import io.aext.core.base.enums.ResourceType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;

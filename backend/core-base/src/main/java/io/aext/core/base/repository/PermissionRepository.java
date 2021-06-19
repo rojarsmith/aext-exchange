@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import io.aext.core.base.constant.ResourceType;
+import io.aext.core.base.enums.ResourceType;
 import io.aext.core.base.model.entity.Permission;
 
 /**

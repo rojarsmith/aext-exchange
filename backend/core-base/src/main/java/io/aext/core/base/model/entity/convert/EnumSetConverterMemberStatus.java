@@ -1,11 +1,11 @@
-package io.aext.core.base;
+package io.aext.core.base.model.entity.convert;
 
 import java.util.EnumSet;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-import io.aext.core.base.constant.MemberStatus;
+import io.aext.core.base.enums.MemberStatus;
 
 /**
  * @author rojar

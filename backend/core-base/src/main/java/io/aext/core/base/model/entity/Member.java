@@ -18,7 +18,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import io.aext.core.base.constant.MemberStatus;
+import io.aext.core.base.enums.MemberStatus;
 import lombok.Data;
 
 /**

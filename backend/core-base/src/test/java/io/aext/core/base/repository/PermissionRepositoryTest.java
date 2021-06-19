@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import io.aext.core.base.constant.ResourceType;
+import io.aext.core.base.enums.ResourceType;
 import io.aext.core.base.model.entity.Permission;
 
 /**

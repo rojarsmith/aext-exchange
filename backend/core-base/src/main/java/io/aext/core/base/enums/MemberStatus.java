@@ -1,8 +1,7 @@
-package io.aext.core.base.constant;
+package io.aext.core.base.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import io.aext.core.base.BaseEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
