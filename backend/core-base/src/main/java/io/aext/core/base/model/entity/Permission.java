@@ -1,4 +1,4 @@
-package io.aext.core.base.entity;
+package io.aext.core.base.model.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -26,8 +26,8 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode
 @Table(name = "permission")
 public class Permission {
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "mid")
-	@GenericGenerator(name = "mid", strategy = "io.aext.core.base.dao.generator.ManulInsertGenerator")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "ManulInsertIdentityGenerator")
+	@GenericGenerator(name = "ManulInsertIdentityGenerator", strategy = "io.aext.core.base.model.entity.generator.ManulInsertIdentityGenerator")
 	@Id
 	Long id;
 

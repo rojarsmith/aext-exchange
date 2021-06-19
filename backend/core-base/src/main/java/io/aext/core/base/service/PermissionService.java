@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import io.aext.core.base.constant.ResourceType;
-import io.aext.core.base.dao.PermissionDao;
-import io.aext.core.base.entity.Permission;
+import io.aext.core.base.model.entity.Permission;
+import io.aext.core.base.repository.PermissionRepository;
 
 /**
  * @author rojar
@@ -18,14 +18,14 @@ import io.aext.core.base.entity.Permission;
 @Service
 public class PermissionService extends BaseService<Permission> {
 	@Autowired
-	PermissionDao permissionDao;
+	PermissionRepository permissionRepository;
 
 	public List<Permission> getAllByTypeEquals(ResourceType type) {
-		return permissionDao.getAllByTypeEquals(type);
+		return permissionRepository.getAllByTypeEquals(type);
 	}
 
 	public Optional<Permission> findById(Long id) {
-		return permissionDao.findById(id);
+		return permissionRepository.findById(id);
 	}
 	
 //	public List<Resource> getIdsByUserId(Long id) {
@@ -33,16 +33,16 @@ public class PermissionService extends BaseService<Permission> {
 //	}
 
 	public int deleteByType(ResourceType type) {
-		List<Permission> data = permissionDao.getAllByTypeEquals(type);
-		permissionDao.deleteAll(data);
+		List<Permission> data = permissionRepository.getAllByTypeEquals(type);
+		permissionRepository.deleteAll(data);
 		return data.size();
 	}
 
 	public List<Permission> save(List<Permission> resource) {
-		return permissionDao.saveAll(resource);
+		return permissionRepository.saveAll(resource);
 	}
 
 	public Permission save(Permission resource) {
-		return permissionDao.save(resource);
+		return permissionRepository.save(resource);
 	}
 }

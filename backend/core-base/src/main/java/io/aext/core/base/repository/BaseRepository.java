@@ -1,8 +1,7 @@
-package io.aext.core.base.dao;
+package io.aext.core.base.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 /**
@@ -11,5 +10,5 @@ import org.springframework.data.repository.NoRepositoryBean;
  * @date 2021-06-05
  */
 @NoRepositoryBean
-public interface BaseDao<T> extends JpaRepository<T, Long>, JpaSpecificationExecutor<T>, QuerydslPredicateExecutor<T> {
+public interface BaseRepository<T> extends JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 }

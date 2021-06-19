@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import io.aext.core.base.entity.Member;
-import io.aext.core.base.entity.Permission;
 import io.aext.core.base.entity.Role;
+import io.aext.core.base.model.entity.Permission;
 import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
 import io.aext.core.base.service.PermissionService;

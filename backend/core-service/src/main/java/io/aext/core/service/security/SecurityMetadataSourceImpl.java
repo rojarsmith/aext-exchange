@@ -14,7 +14,7 @@ import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 
-import io.aext.core.base.entity.Permission;
+import io.aext.core.base.model.entity.Permission;
 import lombok.Getter;
 
 /**

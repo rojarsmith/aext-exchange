@@ -1,6 +1,6 @@
 package io.aext.core.base.service;
 
-import io.aext.core.base.dao.BaseDao;
+import io.aext.core.base.repository.BaseRepository;
 
 /**
  * @author rojar
@@ -8,6 +8,6 @@ import io.aext.core.base.dao.BaseDao;
  * @date 2021-06-06
  */
 @SuppressWarnings("rawtypes")
-public class TopBaseService <E, D extends BaseDao> {
+public class TopBaseService <E, D extends BaseRepository> {
 
 }

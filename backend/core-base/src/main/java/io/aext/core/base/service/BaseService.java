@@ -1,9 +1,9 @@
 package io.aext.core.base.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
+//import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /**
  * @author rojar
@@ -13,6 +13,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 @SuppressWarnings("rawtypes")
 @Component
 public class BaseService<T> extends TopBaseService {
-    @Autowired
-    protected JPAQueryFactory queryFactory;
+//    @Autowired
+//    protected JPAQueryFactory queryFactory;
 }
