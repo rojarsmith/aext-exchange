@@ -1,4 +1,4 @@
-package io.aext.core.base.repository;
+package io.aext.core.base;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,6 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import io.aext.core.base.enums.ResourceType;
 import io.aext.core.base.model.entity.Permission;
+import io.aext.core.base.repository.PermissionRepository;
 
 /**
  * @author rojar
@@ -84,7 +85,6 @@ public class PermissionRepositoryTest {
 	@Test
 	public void pageTest() {
 		Page<Permission> pageResult = permissionRepository.findAll(PageRequest.of(1, 5, Sort.by("id").descending()));
-
 		List<Permission> permissions = pageResult.getContent();
 		assertEquals(5, permissions.size());
 	}

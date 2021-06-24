@@ -59,17 +59,17 @@ public class ApplicationStartup implements ApplicationRunner {
 		// Scan all auth and write to database.
 		List<Permission> list = getAuthResources();
 
-		resourceService.deleteByType(ResourceType.API);
+		resourceService.delete(ResourceType.API);
 
 		if (list == null || list.isEmpty()) {
 			return;
 		} else {
 			SecurityMetadataSourceImpl.getRESOURCES().addAll(list);
-			resourceService.save(list);
+			resourceService.update(list);
 		}
 
 		if (serviceProperty.isDev()) {
-			List<Permission> permissionList = resourceService.getAllByTypeEquals(ResourceType.API);
+			List<Permission> permissionList = resourceService.readPermissions(ResourceType.API);
 			permissionList.remove(0);
 			permissionList.remove(0);
 			Role role = new Role("ROLE_ADMIN", "Admin", permissionList);

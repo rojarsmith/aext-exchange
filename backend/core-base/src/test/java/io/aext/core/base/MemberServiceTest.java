@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -28,21 +26,6 @@ import io.aext.core.base.service.MemberService;
 public class MemberServiceTest {
 	@Autowired
 	MemberService memberService;
-
-//	@PostConstruct
-//	void init() {
-//		Member m1 = new Member();
-//		m1.setEmail("rojarsmith@gmail.com");
-//		m1.setUsername("Rojar");
-//		m1.setPassword("abc");
-//		memberService.save(m1);
-//
-//		Member m2 = new Member();
-//		m2.setEmail("dev@aext.io");
-//		m2.setUsername("Dev かいはつ");
-//		m2.setPassword("abc");
-//		memberService.save(m2);
-//	}
 
 	@Test
 	@Transactional

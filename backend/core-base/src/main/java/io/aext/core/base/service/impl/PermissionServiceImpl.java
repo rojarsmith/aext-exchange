@@ -4,7 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import io.aext.core.base.enums.ResourceType;
@@ -29,7 +37,15 @@ public class PermissionServiceImpl implements PermissionService {
 	PermissionRepository permissionRepository;
 
 	@Override
-	public List<Permission> getIdsByUserId(Long userId) {
+	public Optional<Permission> readPermission(Long id) {
+		return permissionRepository.findById(id);
+	}
+
+	/*
+	 * Include all roles.
+	 */
+	@Override
+	public List<Permission> readPermissions(Long userId) {
 		List<Permission> permissions = new ArrayList<Permission>();
 		Optional<Member> member = memberRepository.findById(userId);
 		if (member.isEmpty()) {
@@ -46,30 +62,43 @@ public class PermissionServiceImpl implements PermissionService {
 	}
 
 	@Override
-	public List<Permission> getAllByTypeEquals(ResourceType type) {
+	public List<Permission> readPermissions(ResourceType type) {
 		return permissionRepository.getAllByTypeEquals(type);
 	}
 
 	@Override
-	public Optional<Permission> findById(Long id) {
-		return permissionRepository.findById(id);
+	public List<Permission> readPermissions(ResourceType type, PageRequest page) {
+		@SuppressWarnings("serial")
+		Specification<Permission> s1 = new Specification<Permission>() {
+
+			@Override
+			public Predicate toPredicate(@SuppressWarnings("rawtypes") Root root,
+					@SuppressWarnings("rawtypes") CriteriaQuery query, CriteriaBuilder criteriaBuilder) {
+				Predicate p1 = criteriaBuilder.equal(root.get("type"), type);
+				return p1;
+			}
+		};
+
+		Page<Permission> permissions = permissionRepository.findAll(Specification.where(s1), page);
+
+		return permissions.getContent();
 	}
 
 	@Override
-	public int deleteByType(ResourceType type) {
-		List<Permission> data = permissionRepository.getAllByTypeEquals(type);
-		permissionRepository.deleteAll(data);
-		return data.size();
-	}
-
-	@Override
-	public List<Permission> save(List<Permission> resource) {
+	public List<Permission> update(List<Permission> resource) {
 		return permissionRepository.saveAll(resource);
 	}
 
 	@Override
-	public Permission save(Permission resource) {
+	public Permission update(Permission resource) {
 		return permissionRepository.save(resource);
+	}
+
+	@Override
+	public int delete(ResourceType type) {
+		List<Permission> data = permissionRepository.getAllByTypeEquals(type);
+		permissionRepository.deleteAll(data);
+		return data.size();
 	}
 
 }

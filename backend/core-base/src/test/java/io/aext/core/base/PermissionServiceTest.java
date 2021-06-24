@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,7 @@ public class PermissionServiceTest {
 				.setPath("DELETE:/api/v1/member/test2")
 				//
 				.setType(ResourceType.API);
-		permissionService.save(Arrays.asList(p1, p2));
+		permissionService.update(Arrays.asList(p1, p2));
 
 		List<Permission> ps1 = new ArrayList<>();
 		for (int i = 1; i <= 99; i++) {
@@ -75,7 +76,7 @@ public class PermissionServiceTest {
 
 			ps1.add(p);
 		}
-		permissionService.save(ps1);
+		permissionService.update(ps1);
 
 		Role role = new Role("ROLE_ADMIN", "Admin", Arrays.asList(p1, p2));
 		roleService.save(role);
@@ -99,7 +100,10 @@ public class PermissionServiceTest {
 	@Transactional
 	public void commonTest() {
 		Optional<Member> member = memberService.findByUsername("Rojar");
-		List<Permission> permissions = permissionService.getIdsByUserId(member.get().getId());
+		List<Permission> permissions = permissionService.readPermissions(member.get().getId());
 		assertEquals(2, permissions.size());
+
+		List<Permission> permissions2 = permissionService.readPermissions(ResourceType.API, PageRequest.of(1, 5));
+		assertEquals(5, permissions2.size());
 	}
 }
