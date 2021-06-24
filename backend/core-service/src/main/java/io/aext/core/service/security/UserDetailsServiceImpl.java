@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import io.aext.core.base.model.entity.Member;
@@ -36,6 +37,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	PermissionService permissionService;
 
 	@Override
+	@Transactional
 	public UserDetails loadUserByUsername(String username) {
 		Optional<Member> member = memberService.findByUsername(username);
 		if (member.isEmpty()) {

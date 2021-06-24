@@ -29,6 +29,7 @@ public class MemberDetails implements UserDetails {
 	String password;
 	boolean enable;
 	Collection<? extends GrantedAuthority> authorities;
+	String jwtHash;
 
 	public MemberDetails(Long userid, String username, String email, String password, boolean enable,
 			Collection<? extends GrantedAuthority> authorities) {
@@ -70,4 +71,7 @@ public class MemberDetails implements UserDetails {
 		return this.enable;
 	}
 
+	public void setJwtHash(String jwtHash) {
+		this.jwtHash = jwtHash;
+	}
 }

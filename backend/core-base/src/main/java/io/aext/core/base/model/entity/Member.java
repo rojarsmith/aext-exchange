@@ -65,4 +65,6 @@ public class Member {
 
 	@ManyToMany(targetEntity = Role.class, fetch = FetchType.LAZY)
 	private List<Role> roleList;
+	
+	String jwtHash;
 }

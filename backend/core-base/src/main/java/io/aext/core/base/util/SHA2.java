@@ -39,8 +39,16 @@ public class SHA2 {
 
 		return toReturn;
 	}
+	
+	public static String getSHA256Short(String input, int beginIndex, int endIndex) {
+		return getSHA256(input).substring(beginIndex, endIndex);
+	}
 
-	public static String getSHA512Short(int beginIndex, int endIndex) {
+	public static String getSHA512Short(String input, int beginIndex, int endIndex) {
+		return getSHA512(input).substring(beginIndex, endIndex);
+	}
+
+	public static String getSHA512ShortByNow(int beginIndex, int endIndex) {
 		return getSHA512(Instant.now().toString()).substring(beginIndex, endIndex);
 	}
 

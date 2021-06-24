@@ -60,10 +60,14 @@ public class BaseController {
 		return success(msg, null);
 	}
 
+	protected ResponseEntity<?> success(Object obj) {
+		return success("Success", obj);
+	}
+	
 	protected ResponseEntity<?> success(String msg, Object obj) {
 		return ResponseEntity.ok().body(new ResultVO<Object>(msg, obj));
 	}
-
+	
 	protected ResponseEntity<?> error(String msg) {
 		return error(msg, null);
 	}

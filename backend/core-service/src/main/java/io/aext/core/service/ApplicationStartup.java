@@ -70,8 +70,9 @@ public class ApplicationStartup implements ApplicationRunner {
 
 		if (serviceProperty.isDev()) {
 			List<Permission> permissionList = resourceService.readPermissions(ResourceType.API);
-			permissionList.remove(0);
-			permissionList.remove(0);
+			// For debug, remove permission.
+//			permissionList.remove(0);
+//			permissionList.remove(0);
 			Role role = new Role("ROLE_ADMIN", "Admin", permissionList);
 			roleService.save(role);
 

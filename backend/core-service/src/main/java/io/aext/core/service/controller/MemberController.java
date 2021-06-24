@@ -136,7 +136,7 @@ public class MemberController extends BaseController {
 		memberService.save(member);
 
 		// Confirmation Mail
-		String token = SHA2.getSHA512Short(0, 8).toUpperCase();
+		String token = SHA2.getSHA512ShortByNow(0, 8).toUpperCase();
 
 		URI locationConfirm = ServletUriComponentsBuilder.fromUriString(serviceProperty.getFrontDomain())
 				.path(serviceProperty.getFrontConfirm()).query("name={name}&token={token}")
@@ -243,27 +243,9 @@ public class MemberController extends BaseController {
 	@RequestMapping("/login")
 	@ResponseBody
 	public ResponseEntity<?> loginEmail(@Valid Login login, BindingResult bindingResult) {
-
-//		Optional<Member> member = memberService.findByUsername(login.getUsername());
-//		if (member.isEmpty() || !passwordEncoder.matches(login.getPassword(), member.get().getPassword())) {
-//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-//					localeMessageSourceService.getMessage("LOGIN_FAILED"));
-//		}
-//		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword());
-//		Authentication authentication = authenticationManager.authenticate(token);
-//		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-//		MemberDetails memberDetails = new MemberDetails(member.get().getId(), member.get().getUsername(),
-//				member.get().getEmail(), member.get().getPassword(), true, null);
-
-//		return success("OK", authentication);
-
 		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword());
 		Authentication authentication = authenticationManager.authenticate(token);
 		MemberDetails member = (MemberDetails) authentication.getPrincipal();
-
-		// Jwt
-//		SecurityContextHolder.getContext().setAuthentication(authentication);	
 
 		MemberVO memberVO = new MemberVO();
 		memberVO.setId(member.getUserid())
@@ -274,24 +256,43 @@ public class MemberController extends BaseController {
 				//
 				.setResourceIds(null);
 
-		return success("ok", memberVO);
+		return success(memberVO);
 	}
 
+	/*
+	 * Standard JWT no concept of logout. This is special.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@RequestMapping("/logout")
 	@ResponseBody
 	public ResponseEntity<?> logout() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Object principal = authentication.getPrincipal();
+
+		MemberVO memberVO = new MemberVO();
+		if (principal.getClass().equals(String.class)) {
+			String user = (String) principal;
+			memberVO.setUsername(user);
+		} else if (principal.getClass().equals(MemberDetails.class)) {
+			MemberDetails user = (MemberDetails) principal;
+			memberVO.setUsername(user.getUsername());
+			ValueOperations valueOperations = redisTemplate.opsForValue();
+			valueOperations.set(JWT_LOGOUT_PREFIX + user.getUsername() + user.getJwtHash(), "1", 7200,
+					TimeUnit.MINUTES);
+		}
+
 		SecurityContextHolder.clearContext();
-		return success("OK");
+
+		return success(memberVO);
 	}
 
-//	@GetMapping("/test")
-	@ResponseBody
 	@PutMapping("/test")
+	@ResponseBody
 	@Auth(id = 1, name = "create new user")
 	public ResponseEntity<?> test() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		authentication.getPrincipal();
-		return success("OK", authentication);
+		return success(authentication);
 	}
 
 	@GetMapping("/test2")
@@ -301,6 +302,6 @@ public class MemberController extends BaseController {
 	public ResponseEntity<?> test2() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		authentication.getPrincipal();
-		return success("OK", authentication);
+		return success(authentication);
 	}
 }
