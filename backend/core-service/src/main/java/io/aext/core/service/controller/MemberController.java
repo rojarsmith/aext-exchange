@@ -133,7 +133,7 @@ public class MemberController extends BaseController {
 		member.setEmail(register.getEmail());
 		member.setRegistTime(Instant.now());
 		member.setMemberLevel(EnumSet.of(MemberStatus.REGISTERD));
-		memberService.save(member);
+		memberService.update(member);
 
 		// Confirmation Mail
 		String token = SHA2.getSHA512ShortByNow(0, 8).toUpperCase();
@@ -184,7 +184,7 @@ public class MemberController extends BaseController {
 		}
 
 		member.get().getMemberLevel().add(MemberStatus.VERIFIED_EMAIL);
-		memberService.save(member.get());
+		memberService.update(member.get());
 
 		valueOperations.getOperations().delete(EMAIL_ACTIVE_CODE_PREFIX + username);
 

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import io.aext.core.base.model.entity.Member;
 import io.aext.core.base.service.MemberService;
+import io.aext.core.base.service.impl.MemberServiceImpl;
 
 /**
  * @author rojar
@@ -37,13 +38,13 @@ public class MemberServiceTest {
 
 		Executable executable = new Executable() {
 			public void execute() {
-				MemberService ms1 = new MemberService();
+				MemberService ms1 = new MemberServiceImpl();
 				ms1.isEmailExist("");
 			}
 		};
 		assertThrows(Exception.class, executable);
 
-		MemberService ms1 = new MemberService();
+		MemberService ms1 = new MemberServiceImpl();
 		assertThrows(Exception.class, () -> {
 			ms1.isEmailExist("");
 		});

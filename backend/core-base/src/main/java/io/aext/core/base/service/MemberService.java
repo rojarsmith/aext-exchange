@@ -1,40 +1,25 @@
 package io.aext.core.base.service;
 
+import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import io.aext.core.base.model.entity.Member;
-import io.aext.core.base.repository.MemberRepository;
 
 /**
  * @author rojar
  *
- * @date 2021-06-19
+ * @date 2021-06-25
  */
-@Service
-public class MemberService  {
-	@Autowired
-	MemberRepository memberRepository;
+public interface MemberService extends BaseService<MemberService> {
+	Optional<Member> findByUsername(String username);
 
-	public Optional<Member> findByUsername(String username) {
-		return memberRepository.findByUsername(username);
-	}
+	Optional<Member> findByEmail(String email);
 
-	public Optional<Member> findByEmail(String email) {
-		return memberRepository.findMemberByEmail(email);
-	}
+	boolean isEmailExist(String email);
 
-	public boolean isEmailExist(String email) {
-		return memberRepository.getAllByEmailEquals(email).size() > 0 ? true : false;
-	}
+	boolean isUsernameExist(String username);
 
-	public boolean isUsernameExist(String username) {
-		return memberRepository.getAllByUsernameEquals(username).size() > 0 ? true : false;
-	}
+	List<Member> update(List<Member> members);
 
-	public Member save(Member member) {
-		return memberRepository.save(member);
-	}
+	Member update(Member member);
 }

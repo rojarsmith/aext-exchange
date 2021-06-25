@@ -86,14 +86,14 @@ public class PermissionServiceTest {
 		m1.setUsername("Rojar");
 		m1.setPassword("abc");
 		m1.setRoleList(Arrays.asList(role));
-		memberService.save(m1);
+		memberService.update(m1);
 
 		Member m2 = new Member();
 		m2.setEmail("dev@aext.io");
 		m2.setUsername("Dev かいはつ");
 		m2.setPassword("abc");
 		m2.setRoleList(Arrays.asList(role));
-		memberService.save(m2);
+		memberService.update(m2);
 	}
 
 	@Test
