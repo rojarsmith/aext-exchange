@@ -1,22 +1,16 @@
 package io.aext.core.base.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.util.List;
 
 import io.aext.core.base.model.entity.Role;
-import io.aext.core.base.repository.RoleRepository;
 
 /**
  * @author rojar
  *
- * @date 2021-06-19
+ * @date 2021-06-25
  */
-@Service
-public class RoleService  {
-	@Autowired
-	RoleRepository roleRepository;
+public interface RoleService extends BaseService<RoleService> {
+	Role update(Role role);
 
-	public Role save(Role role) {
-		return roleRepository.save(role);
-	}
+	List<Role> update(List<Role> roles);
 }

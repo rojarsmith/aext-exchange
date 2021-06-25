@@ -1,22 +1,18 @@
-package io.aext.core.service.config;
+package io.aext.core.service;
 
 import javax.annotation.PreDestroy;
 
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.test.context.TestConfiguration;
 
 import redis.embedded.RedisServer;
 
 /**
  * @author rojar
  *
- * @date 2021-06-12
+ * @date 2021-06-25
  */
-@Profile("test")
-@Configuration
-@EnableConfigurationProperties(RedisProperties.class)
+@TestConfiguration
 public class EmbeddedRedisConfig {
 	private static RedisServer redisServer = null;
 
