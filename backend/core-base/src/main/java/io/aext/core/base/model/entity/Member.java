@@ -56,7 +56,7 @@ public class Member {
 	@Column(unique = true)
 	private String emailRescue;
 
-	@CreationTimestamp
+//	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Instant registTime;
 
