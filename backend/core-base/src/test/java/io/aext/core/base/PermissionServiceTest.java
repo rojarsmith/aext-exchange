@@ -79,7 +79,7 @@ public class PermissionServiceTest {
 		permissionService.update(ps1);
 
 		Role role = new Role("ROLE_ADMIN", "Admin", Arrays.asList(p1, p2));
-		roleService.save(role);
+		roleService.update(role);
 
 		Member m1 = new Member();
 		m1.setEmail("rojarsmith@gmail.com");

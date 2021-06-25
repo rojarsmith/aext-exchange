@@ -21,7 +21,7 @@ import io.aext.core.service.security.UserDetailsServiceImpl;
 /**
  * @author rojar
  *
- * @date 2021-06-12
+ * @date 2021-06-25
  */
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -44,6 +44,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.csrf().disable().formLogin().disable();
 		http.authorizeRequests()
 				//
+				.antMatchers("/api/v1/member/register/email").permitAll()
+				//
 				.antMatchers("/api/v1/member/login").permitAll()
 				//
 				.antMatchers("/api/v1/member/logout").permitAll()
@@ -60,12 +62,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class);
 		http.addFilterBefore(authFilter, FilterSecurityInterceptor.class);
 	}
-
-//	@Override
-//	public void configure(WebSecurity web) throws Exception {
-//		web.ignoring().antMatchers("/h2-console/**").antMatchers("/api/v1/member/register/email")
-//				.antMatchers("/api/v1/member/register/confirm/email/**");
-//	}
 
 	@Bean
 	@Override

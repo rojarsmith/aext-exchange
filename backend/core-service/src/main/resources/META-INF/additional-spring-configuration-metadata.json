@@ -31,9 +31,24 @@
 			"description": "A description for 'logback.path'"
 		},
 		{
-			"name": "service.security.jwt.secretKey",
+			"name": "service.security.jwt.key.private",
 			"type": "java.lang.String",
-			"description": "The security of JWT."
+			"description": "The security of JWT"
+		},
+		{
+			"name": "service.owner.username",
+			"type": "java.lang.String",
+			"description": ""
+		},
+		{
+			"name": "service.owner.password",
+			"type": "java.lang.String",
+			"description": ""
+		},
+		{
+			"name": "service.owner.email",
+			"type": "java.lang.String",
+			"description": ""
 		}
 	]
 }

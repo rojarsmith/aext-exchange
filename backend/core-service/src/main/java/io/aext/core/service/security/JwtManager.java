@@ -17,12 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * @author rojar
  *
- * @date 2021-06-14
+ * @date 2021-06-25
  */
 @Slf4j
 @Component
 public class JwtManager {
-	@Value("${service.security.jwt.secretKey}")
+	@Value("${service.security.jwt.key.private}")
 	private String secretKey = "abcde";
 	private Duration expiration = Duration.ofDays(1);
 

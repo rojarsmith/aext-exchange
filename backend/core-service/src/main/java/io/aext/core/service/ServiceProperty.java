@@ -31,6 +31,15 @@ public class ServiceProperty {
 	@Value("${service.company}")
 	String company;
 
+	@Value("${service.owner.username}")
+	String ownerUsername;
+
+	@Value("${service.owner.password}")
+	String ownerPassword;
+
+	@Value("${service.owner.email}")
+	String ownerEmail;
+
 	public boolean isDev() {
 		if (profilesActive.equals("dev") || profilesActive.equals("test")) {
 			return true;
