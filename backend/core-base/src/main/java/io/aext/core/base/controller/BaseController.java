@@ -16,10 +16,14 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import io.aext.core.base.model.vo.ResultVO;
+import io.aext.core.base.service.LocaleMessageSourceService;
 
 public class BaseController {
 	@Autowired
 	private ApplicationContext applicationContext;
+
+	@Autowired
+	LocaleMessageSourceService localeMessageSourceService;
 
 	protected Map<String, List<Map<String, String>>> buildBindingResultData(BindingResult bindingResult) {
 		Map<String, List<Map<String, String>>> data = new HashMap<>();
@@ -52,6 +56,15 @@ public class BaseController {
 		return key;
 	}
 
+	protected String getMessageML(String message) {
+		try {
+			return localeMessageSourceService.getMessage(message);
+		} catch (Exception e) {
+			e.toString();
+			return "No message.";
+		}
+	}
+
 	protected ResponseEntity<?> success() {
 		return success("Success", null);
 	}
@@ -63,11 +76,11 @@ public class BaseController {
 	protected ResponseEntity<?> success(Object obj) {
 		return success("Success", obj);
 	}
-	
+
 	protected ResponseEntity<?> success(String msg, Object obj) {
 		return ResponseEntity.ok().body(new ResultVO<Object>(msg, obj));
 	}
-	
+
 	protected ResponseEntity<?> error(String msg) {
 		return error(msg, null);
 	}

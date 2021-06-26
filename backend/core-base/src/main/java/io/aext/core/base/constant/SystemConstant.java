@@ -10,12 +10,12 @@ public class SystemConstant {
 	 * IP
 	 */
 	public static final String IP_REGISTER_DELAY_PREFIX = "IP_REGISTER_DELAY_";
-	
+
 	/*
 	 * JWT
 	 */
 	public static final String JWT_LOGOUT_PREFIX = "JWT_LOGOUT_";
-	
+
 	/**
 	 * Verify code
 	 */

@@ -25,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,6 +51,7 @@ import io.aext.core.base.util.IpUtils;
 import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.ServiceProperty;
+import io.aext.core.service.model.param.ReactivateParam;
 import io.aext.core.service.model.param.VerifyParam;
 import io.aext.core.service.payload.Login;
 import io.aext.core.service.payload.Register;
@@ -149,35 +151,37 @@ public class MemberController extends BaseController {
 		member.setMemberLevel(EnumSet.of(MemberStatus.REGISTERD));
 		memberService.update(member);
 
-		// Confirmation Mail
-		String token = SHA2.getSHA512ShortByNow(0, 8).toUpperCase();
+		String token = sendActivateEmail(member);
 
-		URI locationConfirm = ServletUriComponentsBuilder.fromUriString(serviceProperty.getFrontDomain())
-				.path(serviceProperty.getFrontConfirm()).query("username={username}&token={token}")
-				.buildAndExpand(register.getUsername(), token).encode().toUri();
-
-		if (serviceProperty.isDev()
-		//
-//				&& true == false
-		//
-		) {
-			String path = getRequestMappingPath("activate(");
-			locationConfirm = ServletUriComponentsBuilder.fromCurrentContextPath().path(path)
-					.query("username={username}&token={token}").buildAndExpand(register.getUsername(), token).encode()
-					.toUri();
-		}
-
-		// Send Mail
-		String subject = localeMessageSourceService.getMessage("EMAIL_ACTIVATION_CONFIRM_TITLE");
-		String[] mailList = { register.getEmail() };
-		MCActiveConfirm content = new MCActiveConfirm();
-		content.setSubject(subject);
-		content.setConfirmUrl(locationConfirm.toString());
-		Optional<String> mailContent = mailContentBuilder.generateMailContent(content);
-		if (mailContent.isPresent()) {
-			emailSenderService.sendComplexEmail(mailList, serviceProperty.getMailUsername(),
-					serviceProperty.getCompany(), subject, mailContent.get());
-		}
+//		// Confirmation Mail
+//		String token = SHA2.getSHA512ShortByNow(0, 8).toUpperCase();
+//
+//		URI locationConfirm = ServletUriComponentsBuilder.fromUriString(serviceProperty.getFrontDomain())
+//				.path(serviceProperty.getFrontConfirm()).query("username={username}&token={token}")
+//				.buildAndExpand(register.getUsername(), token).encode().toUri();
+//
+//		if (serviceProperty.isDev()
+//		//
+////				&& true == false
+//		//
+//		) {
+//			String path = getRequestMappingPath("activate(");
+//			locationConfirm = ServletUriComponentsBuilder.fromCurrentContextPath().path(path)
+//					.query("username={username}&token={token}").buildAndExpand(register.getUsername(), token).encode()
+//					.toUri();
+//		}
+//
+//		// Send Mail
+//		String subject = localeMessageSourceService.getMessage("EMAIL_ACTIVATION_CONFIRM_TITLE");
+//		String[] mailList = { register.getEmail() };
+//		MCActiveConfirm content = new MCActiveConfirm();
+//		content.setSubject(subject);
+//		content.setConfirmUrl(locationConfirm.toString());
+//		Optional<String> mailContent = mailContentBuilder.generateMailContent(content);
+//		if (mailContent.isPresent()) {
+//			emailSenderService.sendComplexEmail(mailList, serviceProperty.getMailUsername(),
+//					serviceProperty.getCompany(), subject, mailContent.get());
+//		}
 
 		valueOperations.set(EMAIL_ACTIVATE_CODE_PREFIX + register.getUsername(), token, 10, TimeUnit.MINUTES);
 		valueOperations.set(IP_REGISTER_DELAY_PREFIX + ip, "1", 60, TimeUnit.MINUTES);
@@ -212,10 +216,81 @@ public class MemberController extends BaseController {
 		return success();
 	}
 
+	@PostMapping(value = { "/reactivate" })
+	@ResponseBody
+	@Auth(id = 1, name = "active again.")
+	public ResponseEntity<?> reactivate(@Validated ReactivateParam param, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
+			return error(getMessageML("PARAMS_INVALID"), data);
+		}
+
+		if (!param.isMethodValid()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+		}
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		MemberDetails md = (MemberDetails) authentication.getPrincipal();
+
+		Optional<Member> omember = memberService.findByUsername(md.getUsername());
+		if (omember.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+		}
+		Member member = omember.get();
+
+		// Read cache
+		String key = EMAIL_ACTIVATE_CODE_PREFIX + member.getUsername();
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		Object tokenStored = Optional.ofNullable(valueOperations.get(key)).orElse("N");
+		if (!tokenStored.toString().equals("N")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("EMAIL_ALREADY_SEND"));
+		}
+
+		String token = sendActivateEmail(member);
+
+		valueOperations.set(EMAIL_ACTIVATE_CODE_PREFIX + member.getUsername(), token, 10, TimeUnit.MINUTES);
+
+		return success("Check email.");
+	}
+
+	String sendActivateEmail(Member member) {
+		// Confirmation Mail
+		String token = SHA2.getSHA512ShortByNow(0, 8).toUpperCase();
+
+		URI locationConfirm = ServletUriComponentsBuilder.fromUriString(serviceProperty.getFrontDomain())
+				.path(serviceProperty.getFrontConfirm()).query("username={username}&token={token}")
+				.buildAndExpand(member.getUsername(), token).encode().toUri();
+
+		if (serviceProperty.isDev()
+		//
+//				&& true == false
+		//
+		) {
+			String path = getRequestMappingPath("activate(");
+			locationConfirm = ServletUriComponentsBuilder.fromCurrentContextPath().path(path)
+					.query("username={username}&token={token}").buildAndExpand(member.getUsername(), token).encode()
+					.toUri();
+		}
+
+		// Send Mail
+		String subject = localeMessageSourceService.getMessage("EMAIL_ACTIVATION_CONFIRM_TITLE");
+		String[] mailList = { member.getEmail() };
+		MCActiveConfirm content = new MCActiveConfirm();
+		content.setSubject(subject);
+		content.setConfirmUrl(locationConfirm.toString());
+		Optional<String> mailContent = mailContentBuilder.generateMailContent(content);
+		if (mailContent.isPresent()) {
+			emailSenderService.sendComplexEmail(mailList, serviceProperty.getMailUsername(),
+					serviceProperty.getCompany(), subject, mailContent.get());
+		}
+
+		return token;
+	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@PostMapping(value = "/verify")
 	@ResponseBody
-	@Auth(id = 1, name = "send verify code.")
+	@Auth(id = 2, name = "send verify code.")
 	public ResponseEntity<?> verify(VerifyParam param, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);

@@ -127,7 +127,11 @@ public class ApplicationStartup implements ApplicationRunner {
 
 			List<Permission> permissionListMember = new ArrayList<>(permissionListAdmin).stream()
 					//
-					.filter(x -> x.getId() == 1001 || x.getId() == 1098)
+					.filter(x -> x.getId() == 1001
+							//
+							|| x.getId() == 1002
+							//
+							|| x.getId() == 1098)
 					//
 					.collect(Collectors.toList());
 			Role roleMember = new Role("ROLE_MEMBER", "Member", permissionListMember);
