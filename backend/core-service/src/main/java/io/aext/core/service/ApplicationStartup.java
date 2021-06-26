@@ -36,7 +36,7 @@ import io.aext.core.service.security.SecurityMetadataSourceImpl;
 /**
  * @author rojar
  *
- * @date 2021-06-25
+ * @date 2021-06-26
  */
 @Component
 public class ApplicationStartup implements ApplicationRunner {
@@ -127,10 +127,9 @@ public class ApplicationStartup implements ApplicationRunner {
 
 			List<Permission> permissionListMember = new ArrayList<>(permissionListAdmin).stream()
 					//
-					.filter(x -> x.getId() == 1001)
+					.filter(x -> x.getId() == 1001 || x.getId() == 1098)
 					//
 					.collect(Collectors.toList());
-			permissionListMember.remove(0);
 			Role roleMember = new Role("ROLE_MEMBER", "Member", permissionListMember);
 			roleService.update(Arrays.asList(roleAdmin, roleMember));
 
