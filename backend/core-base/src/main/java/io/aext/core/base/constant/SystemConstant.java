@@ -3,7 +3,7 @@ package io.aext.core.base.constant;
 /**
  * @author rojar
  *
- * @date 2021-06-25
+ * @date 2021-06-26
  */
 public class SystemConstant {
 	/*
@@ -16,6 +16,11 @@ public class SystemConstant {
 	 */
 	public static final String JWT_LOGOUT_PREFIX = "JWT_LOGOUT_";
 
+	/**
+	 * Password
+	 */
+	public static final String EMAIL_RESET_PASSWORD_PREFIX = "EMAIL_RESET_PASSWORD_";
+	
 	/**
 	 * Verify code
 	 */

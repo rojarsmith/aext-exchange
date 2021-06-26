@@ -45,16 +45,18 @@ import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
 import io.aext.core.base.service.email.EmailSenderService;
 import io.aext.core.base.service.email.MCActiveConfirm;
+import io.aext.core.base.service.email.MCFindPassword;
 import io.aext.core.base.service.email.MCVerifyCode;
 import io.aext.core.base.service.email.MailContentBuilder;
 import io.aext.core.base.util.IpUtils;
 import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.ServiceProperty;
+import io.aext.core.service.model.param.PasswordModifyParam;
+import io.aext.core.service.model.param.LoginParam;
 import io.aext.core.service.model.param.ReactivateParam;
+import io.aext.core.service.model.param.RegisterParam;
 import io.aext.core.service.model.param.VerifyParam;
-import io.aext.core.service.payload.Login;
-import io.aext.core.service.payload.Register;
 import io.aext.core.service.security.Auth;
 import io.aext.core.service.security.JwtManager;
 import io.aext.core.service.security.MemberDetails;
@@ -101,9 +103,9 @@ public class MemberController extends BaseController {
 	 */
 	@RequestMapping("/register")
 	@ResponseBody
-	public ResponseEntity<?> register(HttpServletRequest request, @Valid Register register,
+	public ResponseEntity<?> register(HttpServletRequest request, @Valid RegisterParam register,
 			BindingResult bindingResult) {
-		// Read cache
+		// check IP
 		String ip = IpUtils.getIpAddr(request);
 		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
 		Object cache = Optional.ofNullable(valueOperations.get(IP_REGISTER_DELAY_PREFIX + ip)).orElse("N");
@@ -133,8 +135,7 @@ public class MemberController extends BaseController {
 					localeMessageSourceService.getMessage("SYSTEM_ERROR"));
 		}
 
-		// Read cache
-//		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		// Check sent
 		Object cacheAct = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVATE_CODE_PREFIX + register.getUsername()))
 				.orElse("N");
 		if (!cacheAct.toString().equals("N")) {
@@ -152,36 +153,6 @@ public class MemberController extends BaseController {
 		memberService.update(member);
 
 		String token = sendActivateEmail(member);
-
-//		// Confirmation Mail
-//		String token = SHA2.getSHA512ShortByNow(0, 8).toUpperCase();
-//
-//		URI locationConfirm = ServletUriComponentsBuilder.fromUriString(serviceProperty.getFrontDomain())
-//				.path(serviceProperty.getFrontConfirm()).query("username={username}&token={token}")
-//				.buildAndExpand(register.getUsername(), token).encode().toUri();
-//
-//		if (serviceProperty.isDev()
-//		//
-////				&& true == false
-//		//
-//		) {
-//			String path = getRequestMappingPath("activate(");
-//			locationConfirm = ServletUriComponentsBuilder.fromCurrentContextPath().path(path)
-//					.query("username={username}&token={token}").buildAndExpand(register.getUsername(), token).encode()
-//					.toUri();
-//		}
-//
-//		// Send Mail
-//		String subject = localeMessageSourceService.getMessage("EMAIL_ACTIVATION_CONFIRM_TITLE");
-//		String[] mailList = { register.getEmail() };
-//		MCActiveConfirm content = new MCActiveConfirm();
-//		content.setSubject(subject);
-//		content.setConfirmUrl(locationConfirm.toString());
-//		Optional<String> mailContent = mailContentBuilder.generateMailContent(content);
-//		if (mailContent.isPresent()) {
-//			emailSenderService.sendComplexEmail(mailList, serviceProperty.getMailUsername(),
-//					serviceProperty.getCompany(), subject, mailContent.get());
-//		}
 
 		valueOperations.set(EMAIL_ACTIVATE_CODE_PREFIX + register.getUsername(), token, 10, TimeUnit.MINUTES);
 		valueOperations.set(IP_REGISTER_DELAY_PREFIX + ip, "1", 60, TimeUnit.MINUTES);
@@ -353,7 +324,7 @@ public class MemberController extends BaseController {
 
 	@RequestMapping("/login")
 	@ResponseBody
-	public ResponseEntity<?> loginEmail(@Valid Login login, BindingResult bindingResult) {
+	public ResponseEntity<?> loginEmail(@Valid LoginParam login, BindingResult bindingResult) {
 		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword());
 		Authentication authentication = authenticationManager.authenticate(token);
 		MemberDetails member = (MemberDetails) authentication.getPrincipal();
@@ -396,6 +367,119 @@ public class MemberController extends BaseController {
 
 		return success(memberVO);
 	}
+
+	@PostMapping(value = { "/password/modify" })
+	@ResponseBody
+	@Auth(id = 5, name = "reset password after login.")
+	public ResponseEntity<?> passwordModify(@Validated PasswordModifyParam param, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
+			return error(getMessageML("PARAMS_INVALID"), data);
+		}
+
+		if (!param.isMethodValid()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+		}
+
+		// Get member
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		MemberDetails md = (MemberDetails) authentication.getPrincipal();
+
+		Optional<Member> omember = memberService.findByUsername(md.getUsername());
+		if (omember.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+		}
+		Member member = omember.get();
+
+		// Read cache
+		String key = EMAIL_RESET_PASSWORD_PREFIX + member.getUsername();
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		Object tokenStored = Optional.ofNullable(valueOperations.get(key)).orElse("N");
+		if (!tokenStored.toString().equals("N")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("EMAIL_ALREADY_SEND"));
+		}
+
+		String token = sendFindPasswordEmail(member);
+
+		valueOperations.set(key, token, 10, TimeUnit.MINUTES);
+
+		return success("Check email.");
+	}
+
+	String sendFindPasswordEmail(Member member) {
+		String token = SHA2.getSHA512ShortByNow(0, 8).toUpperCase();
+
+		URI locationConfirm = ServletUriComponentsBuilder.fromUriString(serviceProperty.getFrontDomain())
+				.path(serviceProperty.getFrontPassword()).query("username={username}&token={token}")
+				.buildAndExpand(member.getUsername(), token).encode().toUri();
+
+		if (serviceProperty.isDev()
+		//
+//					&& true == false
+		//
+		) {
+			String path = getRequestMappingPath("passwordReset(");
+			locationConfirm = ServletUriComponentsBuilder.fromCurrentContextPath().path(path)
+					.query("username={username}&token={token}").buildAndExpand(member.getUsername(), token).encode()
+					.toUri();
+		}
+
+		// Send Mail
+		String subject = localeMessageSourceService.getMessage("RESET_PASSWORD_TITLE");
+		String[] mailList = { member.getEmail() };
+		MCFindPassword content = new MCFindPassword();
+		content.setSubject(subject);
+		content.setConfirmUrl(locationConfirm.toString());
+		Optional<String> mailContent = mailContentBuilder.generateMailContent(content);
+		if (mailContent.isPresent()) {
+			emailSenderService.sendComplexEmail(mailList, serviceProperty.getMailUsername(),
+					serviceProperty.getCompany(), subject, mailContent.get());
+		}
+
+		return token;
+	}
+
+	@PostMapping(value = { "/password/reset" })
+	@ResponseBody
+	public ResponseEntity<?> passwordReset() {
+		return success();
+	}
+
+//	@PostMapping(value = { "/forget" })
+//	@ResponseBody
+//	public ResponseEntity<?> forget(@Validated Reset param, BindingResult bindingResult) {
+//		if (bindingResult.hasErrors()) {
+//			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
+//			return error(getMessageML("PARAMS_INVALID"), data);
+//		}
+//
+//		if (!param.isMethodValid()) {
+//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+//		}
+//
+//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//		MemberDetails md = (MemberDetails) authentication.getPrincipal();
+//
+//		Optional<Member> omember = memberService.findByUsername(md.getUsername());
+//		if (omember.isEmpty()) {
+//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+//		}
+//		Member member = omember.get();
+//
+//		// Read cache
+//		String key = EMAIL_ACTIVATE_CODE_PREFIX + member.getUsername();
+//		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+//		Object tokenStored = Optional.ofNullable(valueOperations.get(key)).orElse("N");
+//		if (!tokenStored.toString().equals("N")) {
+//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("EMAIL_ALREADY_SEND"));
+//		}
+//
+//		String token = sendActivateEmail(member);
+//
+//		valueOperations.set(EMAIL_ACTIVATE_CODE_PREFIX + member.getUsername(), token, 10, TimeUnit.MINUTES);
+//
+//		return success("Check email.");
+//	}
 
 	@PutMapping("/test")
 	@ResponseBody

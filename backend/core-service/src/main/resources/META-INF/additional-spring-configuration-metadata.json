@@ -49,6 +49,11 @@
 			"name": "service.owner.email",
 			"type": "java.lang.String",
 			"description": ""
+		},
+		{
+			"name": "service.front.password",
+			"type": "java.lang.String",
+			"description": ""
 		}
 	]
 }

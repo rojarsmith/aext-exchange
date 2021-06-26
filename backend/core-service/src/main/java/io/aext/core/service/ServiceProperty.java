@@ -25,6 +25,9 @@ public class ServiceProperty {
 	@Value("${service.front.confirm}")
 	String frontConfirm;
 
+	@Value("${service.front.password}")
+	String frontPassword;
+
 	@Value("${spring.mail.username}")
 	String mailUsername;
 

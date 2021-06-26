@@ -33,6 +33,10 @@ public class MailContentBuilder {
 			MCActiveConfirm data = (MCActiveConfirm) content;
 			context.setVariable("data", data);
 			return Optional.ofNullable(templateEngine.process("mailActivateConfirm", context));
+		} else if (content instanceof MCFindPassword) {
+			MCFindPassword data = (MCFindPassword) content;
+			context.setVariable("data", data);
+			return Optional.ofNullable(templateEngine.process("mailFindPassword", context));
 		}
 
 		return Optional.empty();

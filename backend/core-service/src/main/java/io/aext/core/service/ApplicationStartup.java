@@ -131,6 +131,8 @@ public class ApplicationStartup implements ApplicationRunner {
 							//
 							|| x.getId() == 1002
 							//
+							|| x.getId() == 1005
+							//
 							|| x.getId() == 1098)
 					//
 					.collect(Collectors.toList());
