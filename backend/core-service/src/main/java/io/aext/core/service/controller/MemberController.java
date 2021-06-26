@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ import io.aext.core.base.service.email.EmailSenderService;
 import io.aext.core.base.service.email.MCActiveConfirm;
 import io.aext.core.base.service.email.MCVerifyCode;
 import io.aext.core.base.service.email.MailContentBuilder;
+import io.aext.core.base.util.IpUtils;
 import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.ServiceProperty;
@@ -97,7 +99,16 @@ public class MemberController extends BaseController {
 	 */
 	@RequestMapping("/register")
 	@ResponseBody
-	public ResponseEntity<?> register(@Valid Register register, BindingResult bindingResult) {
+	public ResponseEntity<?> register(HttpServletRequest request, @Valid Register register,
+			BindingResult bindingResult) {
+		// Read cache
+		String ip = IpUtils.getIpAddr(request);
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		Object cache = Optional.ofNullable(valueOperations.get(IP_REGISTER_DELAY_PREFIX + ip)).orElse("N");
+		if (!cache.toString().equals("N")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Try it next time.");
+		}
+
 		if (bindingResult.hasErrors()) {
 			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
 			String meesage = localeMessageSourceService.getMessage("REGISTRATION_FAILED");
@@ -121,10 +132,10 @@ public class MemberController extends BaseController {
 		}
 
 		// Read cache
-		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVATE_CODE_PREFIX + register.getUsername()))
+//		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		Object cacheAct = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVATE_CODE_PREFIX + register.getUsername()))
 				.orElse("N");
-		if (!cache.toString().equals("N")) {
+		if (!cacheAct.toString().equals("N")) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					localeMessageSourceService.getMessage("EMAIL_ALREADY_SEND"));
 		}
@@ -169,6 +180,7 @@ public class MemberController extends BaseController {
 		}
 
 		valueOperations.set(EMAIL_ACTIVATE_CODE_PREFIX + register.getUsername(), token, 10, TimeUnit.MINUTES);
+		valueOperations.set(IP_REGISTER_DELAY_PREFIX + ip, "1", 60, TimeUnit.MINUTES);
 
 		return success(localeMessageSourceService.getMessage("SEND_REGISTER_EMAIL_SUCCESS"));
 	}
@@ -220,7 +232,7 @@ public class MemberController extends BaseController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					localeMessageSourceService.getMessage("SYSTEM_ERROR"));
 		}
-				
+
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		MemberDetails md = (MemberDetails) authentication.getPrincipal();
 
