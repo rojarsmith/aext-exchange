@@ -5,6 +5,8 @@
 <head>
 <body>
 	<p th:text="#{EMAIL_ACTIVATION_CONFIRM_TITLE}">hi</p>
-	<div th:text="${data.confirmUrl}"></div>
+	<div>
+		<a th:href="@{${data.confirmUrl}}">ACTIVE</a>
+	</div>
 </body>
 </html>

@@ -1,4 +1,5 @@
---Clean 
+--Clean
+--Only for clean database when dirty data. 
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 GRANT ALL ON SCHEMA public TO postgres;

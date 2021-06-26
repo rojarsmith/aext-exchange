@@ -32,7 +32,7 @@ public class MailContentBuilder {
 		} else if (content instanceof MCActiveConfirm) {
 			MCActiveConfirm data = (MCActiveConfirm) content;
 			context.setVariable("data", data);
-			return Optional.ofNullable(templateEngine.process("mailActiveConfirm", context));
+			return Optional.ofNullable(templateEngine.process("mailActivateConfirm", context));
 		}
 
 		return Optional.empty();

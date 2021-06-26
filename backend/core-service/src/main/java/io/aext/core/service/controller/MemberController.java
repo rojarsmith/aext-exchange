@@ -92,11 +92,11 @@ public class MemberController extends BaseController {
 	private JwtManager jwtManager;
 
 	/**
-	 * Register by email.
+	 * Register by email or sms.
 	 */
-	@RequestMapping("/register/email")
+	@RequestMapping("/register")
 	@ResponseBody
-	public ResponseEntity<?> registerByEmail(@Valid Register register, BindingResult bindingResult) {
+	public ResponseEntity<?> register(@Valid Register register, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
 			String meesage = localeMessageSourceService.getMessage("REGISTRATION_FAILED");
@@ -112,14 +112,16 @@ public class MemberController extends BaseController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					localeMessageSourceService.getMessage("EMAIL_CAN_NOT_USE"));
 		}
-		if (!register.getMethod().toUpperCase().equals("EMAIL")) {
+		if (!register.getMethod().toUpperCase().equals("EMAIL")
+				//
+				&& !register.getMethod().toUpperCase().equals("SMS")) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					localeMessageSourceService.getMessage("SYSTEM_ERROR"));
 		}
 
 		// Read cache
 		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVE_CODE_PREFIX + register.getUsername()))
+		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVATE_CODE_PREFIX + register.getUsername()))
 				.orElse("N");
 		if (!cache.toString().equals("N")) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -139,13 +141,18 @@ public class MemberController extends BaseController {
 		String token = SHA2.getSHA512ShortByNow(0, 8).toUpperCase();
 
 		URI locationConfirm = ServletUriComponentsBuilder.fromUriString(serviceProperty.getFrontDomain())
-				.path(serviceProperty.getFrontConfirm()).query("name={name}&token={token}")
+				.path(serviceProperty.getFrontConfirm()).query("username={username}&token={token}")
 				.buildAndExpand(register.getUsername(), token).encode().toUri();
 
-		if (serviceProperty.isDev()) {
-			String path = getRequestMappingPath("registerConfirmEmail(");
+		if (serviceProperty.isDev()
+		//
+//				&& true == false
+		//
+		) {
+			String path = getRequestMappingPath("activate(");
 			locationConfirm = ServletUriComponentsBuilder.fromCurrentContextPath().path(path)
-					.query("name={name}&token={token}").buildAndExpand(register.getUsername(), token).encode().toUri();
+					.query("username={username}&token={token}").buildAndExpand(register.getUsername(), token).encode()
+					.toUri();
 		}
 
 		// Send Mail
@@ -160,18 +167,19 @@ public class MemberController extends BaseController {
 					serviceProperty.getCompany(), subject, mailContent.get());
 		}
 
-		valueOperations.set(EMAIL_ACTIVE_CODE_PREFIX + register.getUsername(), token, 10, TimeUnit.MINUTES);
+		valueOperations.set(EMAIL_ACTIVATE_CODE_PREFIX + register.getUsername(), token, 10, TimeUnit.MINUTES);
 
 		return success(localeMessageSourceService.getMessage("SEND_REGISTER_EMAIL_SUCCESS"));
 	}
 
-	@RequestMapping(value = { "/register/confirm/email" }, method = { RequestMethod.GET })
-	public ResponseEntity<?> registerConfirmEmail(
+	@RequestMapping(value = { "/activate" }, method = { RequestMethod.GET })
+	public ResponseEntity<?> activate(
+			//
 			@Valid @RequestParam(value = "username", required = true) String username,
 			@Valid @RequestParam(value = "token", required = true) String token) {
 		// Read cache
 		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVE_CODE_PREFIX + username)).orElse("N");
+		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVATE_CODE_PREFIX + username)).orElse("N");
 		if (cache.toString().equals("N") || !cache.toString().equals(token)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					localeMessageSourceService.getMessage("INVALID_LINK"));
@@ -186,7 +194,7 @@ public class MemberController extends BaseController {
 		member.get().getMemberLevel().add(MemberStatus.VERIFIED_EMAIL);
 		memberService.update(member.get());
 
-		valueOperations.getOperations().delete(EMAIL_ACTIVE_CODE_PREFIX + username);
+		valueOperations.getOperations().delete(EMAIL_ACTIVATE_CODE_PREFIX + username);
 
 		return success();
 	}

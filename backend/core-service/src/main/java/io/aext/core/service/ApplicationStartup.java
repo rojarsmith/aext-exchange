@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -46,7 +47,11 @@ public class ApplicationStartup implements ApplicationRunner {
 	PasswordEncoder passwordEncoder;
 
 	@Autowired
-	private RequestMappingInfoHandlerMapping requestMappingInfoHandlerMapping;
+	StringRedisTemplate redisTemplate;
+
+	@Autowired
+	RequestMappingInfoHandlerMapping requestMappingInfoHandlerMapping;
+
 	@Autowired
 	MemberService memberService;
 
@@ -108,6 +113,11 @@ public class ApplicationStartup implements ApplicationRunner {
 
 	void initDatabase() {
 		if (serviceProperty.isDev()) {
+			// Clear Radis
+			Set<String> keys = redisTemplate.keys("*");
+			if (!keys.isEmpty()) {
+				redisTemplate.delete(keys);
+			}
 
 			// Create Roles
 
