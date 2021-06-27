@@ -23,6 +23,9 @@ public class PasswordForgetParam {
 	@Email(message = "{Register.email.format}")
 	private String email;
 
+	@NotBlank
+	String test;
+
 	/*
 	 * SMS, EMAIL
 	 */

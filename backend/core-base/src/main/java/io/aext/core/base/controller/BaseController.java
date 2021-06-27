@@ -31,13 +31,15 @@ public class BaseController {
 		List<Map<String, String>> errors = new ArrayList<>();
 		for (FieldError fieldError : bindingResult.getFieldErrors()) {
 			Map<String, String> error = new HashMap<>();
-			error.put("field", fieldError.getField());
+			error.put("type", "field");
+			error.put("name", fieldError.getField());
 			error.put("message", fieldError.getDefaultMessage());
 			errors.add(error);
 		}
 		for (ObjectError objectError : bindingResult.getGlobalErrors()) {
 			Map<String, String> error = new HashMap<>();
-			error.put("global", objectError.getCode());
+			error.put("type", "global");
+			error.put("name", objectError.getCode());
 			error.put("message", objectError.getDefaultMessage());
 			errors.add(error);
 		}

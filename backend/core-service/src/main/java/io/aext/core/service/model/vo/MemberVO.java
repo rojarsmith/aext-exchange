@@ -1,4 +1,4 @@
-package io.aext.core.service.vo;
+package io.aext.core.service.model.vo;
 
 import java.util.Set;
 

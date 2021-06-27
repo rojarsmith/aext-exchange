@@ -54,13 +54,14 @@ import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.ServiceProperty;
 import io.aext.core.service.model.param.PasswordModifyParam;
 import io.aext.core.service.model.param.LoginParam;
+import io.aext.core.service.model.param.PasswordForgetParam;
 import io.aext.core.service.model.param.ReactivateParam;
 import io.aext.core.service.model.param.RegisterParam;
 import io.aext.core.service.model.param.VerifyParam;
+import io.aext.core.service.model.vo.MemberVO;
 import io.aext.core.service.security.Auth;
 import io.aext.core.service.security.JwtManager;
 import io.aext.core.service.security.MemberDetails;
-import io.aext.core.service.vo.MemberVO;
 
 /**
  * @author Rojar Smith
@@ -406,6 +407,45 @@ public class MemberController extends BaseController {
 		return success("Check email.");
 	}
 
+	@PostMapping(value = { "/password/forget" })
+	@ResponseBody
+	public ResponseEntity<?> passwordForget(@Validated PasswordForgetParam param
+//			, BindingResult bindingResult
+			) {
+//		if (bindingResult.hasErrors()) {
+//			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
+//			return error(getMessageML("PARAMS_INVALID"), data);
+//		}
+
+		if (!param.isMethodValid()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+		}
+
+		// Get member
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		MemberDetails md = (MemberDetails) authentication.getPrincipal();
+
+		Optional<Member> omember = memberService.findByUsername(md.getUsername());
+		if (omember.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+		}
+		Member member = omember.get();
+
+		// Read cache
+		String key = EMAIL_RESET_PASSWORD_PREFIX + member.getUsername();
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		Object tokenStored = Optional.ofNullable(valueOperations.get(key)).orElse("N");
+		if (!tokenStored.toString().equals("N")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("EMAIL_ALREADY_SEND"));
+		}
+
+		String token = sendFindPasswordEmail(member);
+
+		valueOperations.set(key, token, 10, TimeUnit.MINUTES);
+
+		return success("Check email.");
+	}
+	
 	String sendFindPasswordEmail(Member member) {
 		String token = SHA2.getSHA512ShortByNow(0, 8).toUpperCase();
 
@@ -444,42 +484,6 @@ public class MemberController extends BaseController {
 	public ResponseEntity<?> passwordReset() {
 		return success();
 	}
-
-//	@PostMapping(value = { "/forget" })
-//	@ResponseBody
-//	public ResponseEntity<?> forget(@Validated Reset param, BindingResult bindingResult) {
-//		if (bindingResult.hasErrors()) {
-//			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
-//			return error(getMessageML("PARAMS_INVALID"), data);
-//		}
-//
-//		if (!param.isMethodValid()) {
-//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
-//		}
-//
-//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//		MemberDetails md = (MemberDetails) authentication.getPrincipal();
-//
-//		Optional<Member> omember = memberService.findByUsername(md.getUsername());
-//		if (omember.isEmpty()) {
-//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
-//		}
-//		Member member = omember.get();
-//
-//		// Read cache
-//		String key = EMAIL_ACTIVATE_CODE_PREFIX + member.getUsername();
-//		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-//		Object tokenStored = Optional.ofNullable(valueOperations.get(key)).orElse("N");
-//		if (!tokenStored.toString().equals("N")) {
-//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("EMAIL_ALREADY_SEND"));
-//		}
-//
-//		String token = sendActivateEmail(member);
-//
-//		valueOperations.set(EMAIL_ACTIVATE_CODE_PREFIX + member.getUsername(), token, 10, TimeUnit.MINUTES);
-//
-//		return success("Check email.");
-//	}
 
 	@PutMapping("/test")
 	@ResponseBody

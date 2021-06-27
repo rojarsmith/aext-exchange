@@ -7,6 +7,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author rojar
@@ -15,10 +16,14 @@ import org.springframework.beans.BeanUtils;
  */
 public class ValidMethodValidator implements ConstraintValidator<ValidMethod, Object> {
 
+	String usernameFieldName;
+	String emailFieldName;
 	String methodFieldName;
-
+		
 	@Override
 	public void initialize(ValidMethod constraintAnnotation) {
+		usernameFieldName = "username";
+		emailFieldName = "email";
 		methodFieldName = "method";
 	}
 
@@ -28,14 +33,21 @@ public class ValidMethodValidator implements ConstraintValidator<ValidMethod, Ob
 			return false;
 		}
 		try {
-			PropertyDescriptor propertyDescriptor = BeanUtils.getPropertyDescriptor(value.getClass(), methodFieldName);
-			Optional<Object> rv = Optional.ofNullable(propertyDescriptor.getReadMethod().invoke(value));
-			if (rv.isEmpty()) {
-				return false;
-			}
-			String method = (String) rv.get();
-			if (method.toUpperCase().equals("EMAIL") || method.toUpperCase().equals("SMS")) {
-				return true;
+			PropertyDescriptor pdUsername = BeanUtils.getPropertyDescriptor(value.getClass(), usernameFieldName);
+			PropertyDescriptor pdEmail = BeanUtils.getPropertyDescriptor(value.getClass(), emailFieldName);
+			PropertyDescriptor pdMethod = BeanUtils.getPropertyDescriptor(value.getClass(), methodFieldName);
+			String username = (String)pdUsername.getReadMethod().invoke(value);
+			String email = (String)pdEmail.getReadMethod().invoke(value);
+			String method = (String)pdMethod.getReadMethod().invoke(value);
+	
+			if (method.toUpperCase().equals("EMAIL")) {
+				if(StringUtils.hasText(method)) {
+				    return true;
+				}
+			}else if(method.toUpperCase().equals("SMS")) {
+				if(StringUtils.hasText(method)) {
+				    return true;
+				}
 			}
 
 			return false;
