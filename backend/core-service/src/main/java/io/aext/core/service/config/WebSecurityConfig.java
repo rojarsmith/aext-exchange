@@ -48,6 +48,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				//
 				.antMatchers("/api/v1/member/activate").permitAll()
 				//
+				.antMatchers("/api/v1/member/password/forget").permitAll()
+				//
 				.antMatchers("/api/v1/member/verify").permitAll()
 				//
 				.antMatchers("/api/v1/member/login").permitAll()

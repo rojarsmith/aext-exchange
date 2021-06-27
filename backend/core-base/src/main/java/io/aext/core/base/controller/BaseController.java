@@ -11,6 +11,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -32,6 +33,12 @@ public class BaseController {
 			Map<String, String> error = new HashMap<>();
 			error.put("field", fieldError.getField());
 			error.put("message", fieldError.getDefaultMessage());
+			errors.add(error);
+		}
+		for (ObjectError objectError : bindingResult.getGlobalErrors()) {
+			Map<String, String> error = new HashMap<>();
+			error.put("global", objectError.getCode());
+			error.put("message", objectError.getDefaultMessage());
 			errors.add(error);
 		}
 		data.put("errors", errors);
