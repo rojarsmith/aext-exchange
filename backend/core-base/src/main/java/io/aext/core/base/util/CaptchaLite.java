@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -136,5 +138,39 @@ public class CaptchaLite {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/*
+	 * Generate random image
+	 */
+	public List<Object> getRandomCodeImage() {
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
+		image.setRGB(1, 2, 3);
+		Font font = getFont();
+		GraphicsEnvironment localGraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		localGraphicsEnvironment.registerFont(font);
+		Graphics g = localGraphicsEnvironment.createGraphics(image);
+		g.fillRect(0, 0, width, height);
+		g.setColor(getRandomColor(105, 189));
+		g.setFont(font);
+
+		for (int i = 0; i < lineSize; i++) {
+			drawLine(g);
+		}
+
+		String random_string = "";
+		for (int i = 0; i < stringNum; i++) {
+			random_string = drawString(g, random_string, i);
+		}
+
+		System.out.println(random_string);
+
+		g.dispose();
+
+		List<Object> res = new ArrayList<>();
+		res.add(random_string);
+		res.add(image);
+
+		return res;
 	}
 }

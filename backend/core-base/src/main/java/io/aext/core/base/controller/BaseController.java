@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -22,6 +26,9 @@ import io.aext.core.base.service.LocaleMessageSourceService;
 public class BaseController {
 	@Autowired
 	private ApplicationContext applicationContext;
+
+	@Autowired
+	StringRedisTemplate redisTemplate;
 
 	@Autowired
 	LocaleMessageSourceService localeMessageSourceService;
@@ -96,5 +103,15 @@ public class BaseController {
 
 	protected ResponseEntity<?> error(String msg, Object obj) {
 		return ResponseEntity.badRequest().body(new ResultVO<Object>(msg, obj));
+	}
+
+	protected String readRedisValueAsString(String key) {
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		return Optional.ofNullable(valueOperations.get(key)).orElse("N");
+	}
+
+	protected void updateRedisValueAsString(String key, String value, int seconds) {
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		valueOperations.set(key, value, seconds, TimeUnit.SECONDS);
 	}
 }
