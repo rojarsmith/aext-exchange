@@ -46,6 +46,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				//
 				.antMatchers("/api/v1/captcha/new/png").permitAll()
 				//
+				.antMatchers("/api/v1/captcha/new/base64").permitAll()
+				//
 				.antMatchers("/api/v1/member/register").permitAll()
 				//
 				.antMatchers("/api/v1/member/activate").permitAll()

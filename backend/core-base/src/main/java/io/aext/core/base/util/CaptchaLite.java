@@ -5,8 +5,10 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Random;
 
@@ -145,7 +147,6 @@ public class CaptchaLite {
 	 */
 	public List<Object> getRandomCodeImage() {
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
-		image.setRGB(1, 2, 3);
 		Font font = getFont();
 		GraphicsEnvironment localGraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		localGraphicsEnvironment.registerFont(font);
@@ -170,6 +171,48 @@ public class CaptchaLite {
 		List<Object> res = new ArrayList<>();
 		res.add(random_string);
 		res.add(image);
+
+		return res;
+	}
+
+	public List<Object> getRandomCodeBase64() {
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
+		Font font = getFont();
+		GraphicsEnvironment localGraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		localGraphicsEnvironment.registerFont(font);
+		Graphics g = localGraphicsEnvironment.createGraphics(image);
+		g.fillRect(0, 0, width, height);
+		g.setColor(getRandomColor(105, 189));
+		g.setFont(getFont());
+
+		for (int i = 0; i < lineSize; i++) {
+			drawLine(g);
+		}
+
+		String random_string = "";
+		for (int i = 0; i < stringNum; i++) {
+			random_string = drawString(g, random_string, i);
+		}
+
+		System.out.println(random_string);
+
+		g.dispose();
+
+		String base64String = "";
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ImageIO.write(image, "PNG", bos);
+
+			byte[] bytes = bos.toByteArray();
+			Base64.Encoder encoder = Base64.getEncoder();
+			base64String = encoder.encodeToString(bytes);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		List<Object> res = new ArrayList<>();
+		res.add(random_string);
+		res.add(base64String);
 
 		return res;
 	}

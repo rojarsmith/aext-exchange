@@ -4,18 +4,19 @@ import static io.aext.core.base.constant.SystemConstant.CAPTCHA_PREFIX;
 import static io.aext.core.base.constant.SystemConstant.IP_DELAY_PREFIX;
 
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -26,7 +27,6 @@ import org.springframework.web.server.ResponseStatusException;
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.util.CaptchaLite;
 import io.aext.core.base.util.IpUtils;
-import io.aext.core.service.model.param.NewImage;
 
 /**
  * @author Rojar Smith
@@ -41,7 +41,7 @@ public class CaptchaController extends BaseController {
 
 	@PostMapping(value = { "/new/png" }, produces = "image/png")
 	@ResponseBody
-	public BufferedImage newImage(HttpServletRequest request, HttpServletResponse response, @Validated NewImage param) {
+	public BufferedImage newImage(HttpServletRequest request) {
 		String ip = IpUtils.getIpAddr(request);
 		// Read cache
 		String key = CAPTCHA_PREFIX + ip;
@@ -54,7 +54,6 @@ public class CaptchaController extends BaseController {
 		CaptchaLite validateCode = new CaptchaLite();
 
 		List<Object> captcha = validateCode.getRandomCodeImage();
-
 		String token = (String) captcha.get(0);
 		BufferedImage image = (BufferedImage) captcha.get(1);
 
@@ -62,29 +61,33 @@ public class CaptchaController extends BaseController {
 		updateRedisValueAsString(key, token, 600);
 
 		return image;
+	}
 
-//		// Get member
-//		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//		MemberDetails md = (MemberDetails) authentication.getPrincipal();
-//
-//		Optional<Member> omember = memberService.findByUsername(md.getUsername());
-//		if (omember.isEmpty()) {
-//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
-//		}
-//		Member member = omember.get();
-//
-//		// Read cache
-//		String key = EMAIL_RESET_PASSWORD_PREFIX + member.getUsername();
-//		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-//		Object tokenStored = Optional.ofNullable(valueOperations.get(key)).orElse("N");
-//		if (!tokenStored.toString().equals("N")) {
-//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("EMAIL_ALREADY_SEND"));
-//		}
-//
-//
-//		valueOperations.set(key, token, 10, TimeUnit.MINUTES);
+	@PostMapping(value = { "/new/base64" })
+	@ResponseBody
+	public ResponseEntity<?> newBase64(HttpServletRequest request) {
+		String ip = IpUtils.getIpAddr(request);
+		// Read cache
+		String key = CAPTCHA_PREFIX + ip;
+		String key2 = IP_DELAY_PREFIX + ip;
+		String delay = readRedisValueAsString(key2);
+		if (!delay.equals("N")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("TRY_IT_LATER"));
+		}
 
-//		return success("Check email.");
+		CaptchaLite validateCode = new CaptchaLite();
+
+		List<Object> captcha = validateCode.getRandomCodeBase64();
+		String token = (String) captcha.get(0);
+		String image = (String) captcha.get(1);
+
+		Map<String, String> data = new HashMap<>();
+		data.put("image", "data:image/png;base64," + image);
+
+		updateRedisValueAsString(key2, "Y", 3);
+		updateRedisValueAsString(key, token, 600);
+
+		return success(data);
 	}
 
 	@Bean
