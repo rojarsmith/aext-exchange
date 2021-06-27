@@ -66,7 +66,7 @@ import io.aext.core.service.security.MemberDetails;
 /**
  * @author Rojar Smith
  * @Description:
- * @date 2021/6/5
+ * @date 2021/06/27
  */
 @RestController
 @RequestMapping(value = { "/api/v1/member" })
@@ -417,9 +417,9 @@ public class MemberController extends BaseController {
 //			return error(getMessageML("PARAMS_INVALID"), data);
 //		}
 
-		if (!param.isMethodValid()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
-		}
+//		if (!param.isMethodValid()) {
+//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+//		}
 
 		// Get member
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
