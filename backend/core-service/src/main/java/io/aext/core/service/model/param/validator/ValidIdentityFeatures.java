@@ -13,16 +13,18 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * @author rojar
  *
- * @date 2021-06-27
+ * @date 2021-06-28
  */
-@Constraint(validatedBy = ValidMethodValidator.class)
+@Constraint(validatedBy = ValidIdentityFeaturesValidator.class)
 @Target({ TYPE }) // Class-level constraints
 @Retention(RUNTIME)
 @Documented
-public @interface ValidMethod {
-	String message() default "Method not valid.";
+public @interface ValidIdentityFeatures {
+	String message() default "Identity Features not valid.";
 
 	Class<?>[] groups() default {};
 
 	Class<? extends Payload>[] payload() default {};
+
+	String identityFeaturesFieldName();
 }

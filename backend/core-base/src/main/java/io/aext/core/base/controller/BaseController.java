@@ -114,4 +114,9 @@ public class BaseController {
 		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
 		valueOperations.set(key, value, seconds, TimeUnit.SECONDS);
 	}
+
+	protected void deleteRedisValueAsString(String key) {
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		valueOperations.getOperations().delete(key);
+	}
 }

@@ -6,17 +6,17 @@ import java.util.regex.Pattern;
 /**
  * @author rojar
  *
- * @date 2021-06-06
+ * @date 2021-06-28
  */
 public class ValueValidate {
 	/*
 	 * Validate user name.
 	 * 
-	 * 5-21 digits. Can only be letters (case sensitive), numbers, and underscores.
+	 * 3-20 digits. Can only be letters (case sensitive), numbers, and underscores.
 	 * Cannot start and end with underscores.
 	 */
 	public static boolean validateUserName(String target) {
-		Pattern pattern = Pattern.compile("^[a-zA-Z\\d]\\w{3,19}[a-zA-Z\\d]$");
+		Pattern pattern = Pattern.compile("^[a-zA-Z\\d]\\w{1,18}[a-zA-Z\\d]$");
 		Matcher matcher = pattern.matcher(target);
 		return matcher.find();
 	}
@@ -42,6 +42,15 @@ public class ValueValidate {
 	 */
 	public static boolean validatePassword(String target) {
 		Pattern pattern = Pattern.compile("^([^\\s]){8,16}$");
+		Matcher matcher = pattern.matcher(target);
+		return matcher.find();
+	}
+
+	/*
+	 * Validate if string only contains ASCII char.
+	 */
+	public static boolean validateOnlyAscii(String target) {
+		Pattern pattern = Pattern.compile("^[\\x00-\\x7F]+$");
 		Matcher matcher = pattern.matcher(target);
 		return matcher.find();
 	}

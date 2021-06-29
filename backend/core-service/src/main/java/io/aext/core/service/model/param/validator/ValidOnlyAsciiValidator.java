@@ -1,10 +1,9 @@
 package io.aext.core.service.model.param.validator;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+
+import io.aext.core.base.util.ValueValidate;
 
 /**
  * @author rojar
@@ -18,8 +17,6 @@ public class ValidOnlyAsciiValidator implements ConstraintValidator<ValidOnlyAsc
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		Pattern pattern = Pattern.compile("^[\\x00-\\x7F]+$");
-		Matcher matcher = pattern.matcher(value);
-		return matcher.find();
+		return ValueValidate.validateOnlyAscii(value);
 	}
 }

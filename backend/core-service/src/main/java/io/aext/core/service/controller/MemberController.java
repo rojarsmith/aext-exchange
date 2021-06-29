@@ -4,6 +4,7 @@ import static io.aext.core.base.constant.SystemConstant.*;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.ServiceProperty;
 import io.aext.core.service.model.param.PasswordModifyParam;
+import io.aext.core.service.model.param.PasswordResetParam;
 import io.aext.core.service.model.param.LoginParam;
 import io.aext.core.service.model.param.PasswordForgetParam;
 import io.aext.core.service.model.param.ReactivateParam;
@@ -409,43 +411,59 @@ public class MemberController extends BaseController {
 
 	@PostMapping(value = { "/password/forget" })
 	@ResponseBody
-	public ResponseEntity<?> passwordForget(@Validated PasswordForgetParam param
-//			, BindingResult bindingResult
-			) {
-//		if (bindingResult.hasErrors()) {
-//			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
-//			return error(getMessageML("PARAMS_INVALID"), data);
-//		}
+	public ResponseEntity<?> passwordForget(HttpServletRequest request, @Validated PasswordForgetParam param) {
+		String ip = IpUtils.getIpAddr(request);
+		String keyCap = CAPTCHA_PREFIX + ip;
+		String tokenCap = readRedisValueAsString(keyCap);
+		if (!tokenCap.equals(param.getToken())) {
+			return error(getMessageML("CAPTCHA_INVALID"));
+		}
 
-//		if (!param.isMethodValid()) {
-//			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
-//		}
+		// 0:username 1:email 2:sms
+		int[] type = new int[3];
+		String identityFeatures = param.getIdentityFeatures();
 
-		// Get member
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		MemberDetails md = (MemberDetails) authentication.getPrincipal();
+		// Check if email
+		boolean isEmail = ValueValidate.validateEmail(identityFeatures);
+		if (isEmail) {
+			type[1] = 1;
+		}
 
-		Optional<Member> omember = memberService.findByUsername(md.getUsername());
+		boolean isUsername = ValueValidate.validateUserName(identityFeatures);
+		if (isUsername) {
+			type[0] = 1;
+		}
+
+		int dips = Arrays.stream(type).sum();
+
+		Optional<Member> omember = null;
+
+		if (dips <= 0) {
+			return error(getMessageML("INPUT_INVALID"));
+		} else if (isEmail) {
+			omember = memberService.findByEmail(identityFeatures);
+		} else if (isUsername) {
+			omember = memberService.findByUsername(identityFeatures);
+		}
 		if (omember.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("FIND_ERROR"));
 		}
 		Member member = omember.get();
 
 		// Read cache
-		String key = EMAIL_RESET_PASSWORD_PREFIX + member.getUsername();
-		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		Object tokenStored = Optional.ofNullable(valueOperations.get(key)).orElse("N");
-		if (!tokenStored.toString().equals("N")) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("EMAIL_ALREADY_SEND"));
+		String keyV = PASSWORD_FORGET_PREFIX + member.getUsername();
+		String tokenV = readRedisValueAsString(keyV);
+		if (!tokenV.equals("N")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("TRY_IT_LATER"));
 		}
 
 		String token = sendFindPasswordEmail(member);
 
-		valueOperations.set(key, token, 10, TimeUnit.MINUTES);
+		updateRedisValueAsString(keyV, token, 600);
 
-		return success("Check email.");
+		return success(getMessageML("PROCESS_SUCCESS"));
 	}
-	
+
 	String sendFindPasswordEmail(Member member) {
 		String token = SHA2.getSHA512ShortByNow(0, 8).toUpperCase();
 
@@ -481,8 +499,26 @@ public class MemberController extends BaseController {
 
 	@PostMapping(value = { "/password/reset" })
 	@ResponseBody
-	public ResponseEntity<?> passwordReset() {
-		return success();
+	public ResponseEntity<?> passwordReset(@Valid PasswordResetParam param) {
+		// Read cache
+		String keyV = PASSWORD_FORGET_PREFIX + param.getUsername();
+		String tokenV = readRedisValueAsString(keyV);
+		if (!tokenV.equals(param.getToken())) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("TOKEN_INVALID"));
+		}
+		
+		Optional<Member> omember = memberService.findByUsername(param.getUsername());
+		if (omember.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+		}
+		Member member = omember.get();
+
+		member.setPassword(passwordEncoder.encode(param.getPassword()));
+		memberService.update(member);
+		
+		deleteRedisValueAsString(keyV);
+		
+		return success(getMessageML("PROCESS_SUCCESS"));
 	}
 
 	@PutMapping("/test")
