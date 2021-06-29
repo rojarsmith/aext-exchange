@@ -16,12 +16,12 @@ import javax.validation.Payload;
  *
  * @date 2021-06-29
  */
-@Constraint(validatedBy = ValidOnlyAsciiValidator.class)
+@Constraint(validatedBy = ValidVerifyMethodValidator.class)
 @Target({ METHOD, FIELD })
 @Retention(RUNTIME)
 @Documented
-public @interface ValidOnlyAscii {
-	String message() default "Has non ASCII char.";
+public @interface ValidVerifyMethod {
+	String message() default "Method not valid.";
 
 	Class<?>[] groups() default {};
 

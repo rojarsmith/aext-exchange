@@ -21,10 +21,8 @@ public class SystemConstant {
 	/**
 	 * Password
 	 */
-	public static final String EMAIL_RESET_PASSWORD_PREFIX = "EMAIL_RESET_PASSWORD_";
+	public static final String PASSWORD_RESET_PREFIX = "PASSWORD_RESET_";
 
-	public static final String PASSWORD_FORGET_PREFIX = "PASSWORD_FORGET_PASSWORD_";
-	
 	/**
 	 * Verify code
 	 */

@@ -374,39 +374,29 @@ public class MemberController extends BaseController {
 	@PostMapping(value = { "/password/modify" })
 	@ResponseBody
 	@Auth(id = 5, name = "reset password after login.")
-	public ResponseEntity<?> passwordModify(@Validated PasswordModifyParam param, BindingResult bindingResult) {
-		if (bindingResult.hasErrors()) {
-			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
-			return error(getMessageML("PARAMS_INVALID"), data);
-		}
-
-		if (!param.isMethodValid()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
-		}
-
-		// Get member
+	public ResponseEntity<?> passwordModify(@Validated PasswordModifyParam param) {
+		// Get member from context
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		MemberDetails md = (MemberDetails) authentication.getPrincipal();
 
+		// Get member from database
 		Optional<Member> omember = memberService.findByUsername(md.getUsername());
 		if (omember.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
 		}
 		Member member = omember.get();
 
-		// Read cache
-		String key = EMAIL_RESET_PASSWORD_PREFIX + member.getUsername();
-		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		Object tokenStored = Optional.ofNullable(valueOperations.get(key)).orElse("N");
-		if (!tokenStored.toString().equals("N")) {
+		// Check email sent
+		String keyToken = PASSWORD_RESET_PREFIX + member.getUsername();
+		String valueToken = readRedisValueAsString(keyToken);
+		if (!valueToken.toString().equals("N")) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("EMAIL_ALREADY_SEND"));
 		}
-
 		String token = sendFindPasswordEmail(member);
 
-		valueOperations.set(key, token, 10, TimeUnit.MINUTES);
+		updateRedisValueAsString(keyToken, token, 600);
 
-		return success("Check email.");
+		return success(getMessageML("PROCESS_SUCCESS"));
 	}
 
 	@PostMapping(value = { "/password/forget" })
@@ -451,7 +441,7 @@ public class MemberController extends BaseController {
 		Member member = omember.get();
 
 		// Read cache
-		String keyV = PASSWORD_FORGET_PREFIX + member.getUsername();
+		String keyV = PASSWORD_RESET_PREFIX + member.getUsername();
 		String tokenV = readRedisValueAsString(keyV);
 		if (!tokenV.equals("N")) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("TRY_IT_LATER"));
@@ -501,12 +491,12 @@ public class MemberController extends BaseController {
 	@ResponseBody
 	public ResponseEntity<?> passwordReset(@Valid PasswordResetParam param) {
 		// Read cache
-		String keyV = PASSWORD_FORGET_PREFIX + param.getUsername();
+		String keyV = PASSWORD_RESET_PREFIX + param.getUsername();
 		String tokenV = readRedisValueAsString(keyV);
 		if (!tokenV.equals(param.getToken())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("TOKEN_INVALID"));
 		}
-		
+
 		Optional<Member> omember = memberService.findByUsername(param.getUsername());
 		if (omember.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
@@ -515,9 +505,9 @@ public class MemberController extends BaseController {
 
 		member.setPassword(passwordEncoder.encode(param.getPassword()));
 		memberService.update(member);
-		
+
 		deleteRedisValueAsString(keyV);
-		
+
 		return success(getMessageML("PROCESS_SUCCESS"));
 	}
 

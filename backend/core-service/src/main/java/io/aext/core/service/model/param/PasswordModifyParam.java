@@ -2,12 +2,13 @@ package io.aext.core.service.model.param;
 
 import javax.validation.constraints.NotBlank;
 
+import io.aext.core.service.model.param.validator.ValidVerifyMethod;
 import lombok.Data;
 
 /**
  * @author rojar
  *
- * @date 2021-6-26
+ * @date 2021-6-29
  */
 @Data
 public class PasswordModifyParam {
@@ -15,17 +16,14 @@ public class PasswordModifyParam {
 	 * SMS, EMAIL
 	 */
 	@NotBlank
-	private String method;
+	@ValidVerifyMethod(message = "#{InputNotValid}")
+	private String verifyMethod;
 
 	public boolean isMethodEmail() {
-		return this.method.toUpperCase().equals("EMAIL");
+		return this.verifyMethod.toUpperCase().equals("EMAIL");
 	}
 
 	public boolean isMethodSMS() {
-		return this.method.toUpperCase().equals("SMS");
-	}
-
-	public boolean isMethodValid() {
-		return isMethodEmail() || isMethodSMS();
+		return this.verifyMethod.toUpperCase().equals("SMS");
 	}
 }
