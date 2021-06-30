@@ -1,7 +1,7 @@
 package io.aext.core.service.controller;
 
-import static io.aext.core.base.constant.SystemConstant.CAPTCHA_PREFIX;
-import static io.aext.core.base.constant.SystemConstant.IP_DELAY_PREFIX;
+import static io.aext.core.base.constant.SystemConstant.CAPTCHA_TOKEN_PREFIX;
+import static io.aext.core.base.constant.SystemConstant.CAPTCHA_IP_DELAY_PREFIX;
 
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -44,8 +44,8 @@ public class CaptchaController extends BaseController {
 	public BufferedImage newImage(HttpServletRequest request) {
 		String ip = IpUtils.getIpAddr(request);
 		// Read cache
-		String key = CAPTCHA_PREFIX + ip;
-		String key2 = IP_DELAY_PREFIX + ip;
+		String key = CAPTCHA_TOKEN_PREFIX + ip;
+		String key2 = CAPTCHA_IP_DELAY_PREFIX + ip;
 		String delay = readRedisValueAsString(key2);
 		if (!delay.equals("N")) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("TRY_IT_LATER"));
@@ -68,8 +68,8 @@ public class CaptchaController extends BaseController {
 	public ResponseEntity<?> newBase64(HttpServletRequest request) {
 		String ip = IpUtils.getIpAddr(request);
 		// Read cache
-		String key = CAPTCHA_PREFIX + ip;
-		String key2 = IP_DELAY_PREFIX + ip;
+		String key = CAPTCHA_TOKEN_PREFIX + ip;
+		String key2 = CAPTCHA_IP_DELAY_PREFIX + ip;
 		String delay = readRedisValueAsString(key2);
 		if (!delay.equals("N")) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("TRY_IT_LATER"));

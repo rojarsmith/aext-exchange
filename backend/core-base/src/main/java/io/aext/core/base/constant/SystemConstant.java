@@ -10,8 +10,8 @@ public class SystemConstant {
 	 * IP
 	 */
 	public static final String IP_REGISTER_DELAY_PREFIX = "IP_REGISTER_DELAY_";
-	// Anti DDoS
-	public static final String IP_DELAY_PREFIX = "IP_DELAY_";
+
+
 
 	/*
 	 * JWT
@@ -33,5 +33,7 @@ public class SystemConstant {
 	/**
 	 * Captcha
 	 */
-	public static final String CAPTCHA_PREFIX = "CAPTCHA_";
+	// Anti DDoS
+	public static final String CAPTCHA_IP_DELAY_PREFIX = "CAPTCHA_IP_DELAY_";
+	public static final String CAPTCHA_TOKEN_PREFIX = "CAPTCHA_TOKEN_";
 }

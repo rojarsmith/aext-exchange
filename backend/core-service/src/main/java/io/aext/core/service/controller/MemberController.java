@@ -403,7 +403,7 @@ public class MemberController extends BaseController {
 	@ResponseBody
 	public ResponseEntity<?> passwordForget(HttpServletRequest request, @Validated PasswordForgetParam param) {
 		String ip = IpUtils.getIpAddr(request);
-		String keyCap = CAPTCHA_PREFIX + ip;
+		String keyCap = CAPTCHA_TOKEN_PREFIX + ip;
 		String tokenCap = readRedisValueAsString(keyCap);
 		if (!tokenCap.equals(param.getToken())) {
 			return error(getMessageML("CAPTCHA_INVALID"));
