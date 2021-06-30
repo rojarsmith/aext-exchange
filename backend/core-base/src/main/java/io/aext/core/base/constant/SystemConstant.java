@@ -1,7 +1,7 @@
 package io.aext.core.base.constant;
 
 /**
- * @author rojar
+ * @author Rojar Smith
  *
  * @date 2021-06-27
  */

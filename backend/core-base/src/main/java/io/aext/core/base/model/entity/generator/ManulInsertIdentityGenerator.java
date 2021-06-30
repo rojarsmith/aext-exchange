@@ -7,7 +7,7 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentityGenerator;
 
 /**
- * @author rojar
+ * @author Rojar Smith
  *
  * @date 2021-06-17
  */

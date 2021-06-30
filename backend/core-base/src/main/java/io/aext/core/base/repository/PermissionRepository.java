@@ -11,9 +11,9 @@ import io.aext.core.base.enums.ResourceType;
 import io.aext.core.base.model.entity.Permission;
 
 /**
- * @author rojar
+ * @author Rojar Smith
  *
- * @date 2021-06-15
+ * @date 2021-06-30
  */
 @Repository
 public interface PermissionRepository extends BaseRepository<Permission> {

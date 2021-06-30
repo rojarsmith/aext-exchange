@@ -8,7 +8,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 /**
- * @author rojar
+ * @author Rojar Smith
  *
  * @date 2021-06-08
  */

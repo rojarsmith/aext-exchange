@@ -23,6 +23,11 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import io.aext.core.base.model.vo.ResultVO;
 import io.aext.core.base.service.LocaleMessageSourceService;
 
+/**
+ * @author Rojar Smith
+ *
+ * @date 2021-06-30
+ */
 public class BaseController {
 	@Autowired
 	private ApplicationContext applicationContext;

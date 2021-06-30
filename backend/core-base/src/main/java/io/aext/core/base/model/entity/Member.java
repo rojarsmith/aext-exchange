@@ -22,49 +22,49 @@ import io.aext.core.base.enums.MemberStatus;
 import lombok.Data;
 
 /**
- * @author rojar
+ * @author Rojar Smith
  *
- * @date 2021-06-05
+ * @date 2021-06-30
  */
 @Data
 @Entity
 public class Member {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Id
-	private Long id;
+	Long id;
 
 	@NotBlank
 	@Column(unique = true)
-	private String username;
+	String username;
 
 	/**
 	 * login password
 	 */
 	@JsonIgnore
 	@NotBlank
-	private String password;
+	String password;
 
 	/**
 	 * fund password
 	 */
 	@JsonIgnore
-	private String fundPassword;
+	String fundPassword;
 
 	@Column(unique = true)
-	private String email;
+	String email;
 
 	@Column(unique = true)
-	private String emailRescue;
+	String emailRescue;
 
 //	@CreationTimestamp
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private Instant registTime;
+	Instant registTime;
 
 	@Column(name = "status")
-	private EnumSet<MemberStatus> memberLevel = EnumSet.noneOf(MemberStatus.class);
+	EnumSet<MemberStatus> memberLevel = EnumSet.noneOf(MemberStatus.class);
 
 	@ManyToMany(targetEntity = Role.class, fetch = FetchType.LAZY)
-	private List<Role> roleList;
-	
+	List<Role> roleList;
+
 	String jwtHash;
 }

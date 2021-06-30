@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import io.aext.core.base.model.entity.Role;
 
 /**
- * @author rojar
+ * @author Rojar Smith
  *
  * @date 2021-06-19
  */

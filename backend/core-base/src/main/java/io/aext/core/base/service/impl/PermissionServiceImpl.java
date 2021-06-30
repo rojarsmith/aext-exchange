@@ -24,7 +24,7 @@ import io.aext.core.base.repository.PermissionRepository;
 import io.aext.core.base.service.PermissionService;
 
 /**
- * @author rojar
+ * @author Rojar Smith
  *
  * @date 2021-06-19
  */

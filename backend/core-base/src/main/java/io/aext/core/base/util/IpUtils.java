@@ -10,7 +10,7 @@ import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author rojar
+ * @author Rojar Smith
  *
  * @date 2021-06-26
  */

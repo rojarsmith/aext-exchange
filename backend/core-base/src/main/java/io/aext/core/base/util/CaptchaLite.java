@@ -20,7 +20,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author rojar
+ * @author Rojar Smith
  *
  * @date 2021-06-27
  */
