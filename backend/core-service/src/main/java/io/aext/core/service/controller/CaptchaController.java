@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.security.LimitedAccess;
@@ -40,9 +42,10 @@ public class CaptchaController extends BaseController {
 	@PostMapping(value = { "/new/png" }, produces = "image/png")
 	@ResponseBody
 	@LimitedAccess(frequency = 1, second = 1, heavyFrequency = 10, heavySecond = 60, heavyDelay = 86400)
-	public BufferedImage newImage(HttpServletRequest request) {
+	public BufferedImage newImage() {
 		// Check cache
-		String ip = IpUtils.getIpAddr(request);
+		ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		String ip = IpUtils.getIpAddr(attributes.getRequest());
 		String keyToken = CAPTCHA_TOKEN_PREFIX + ip;
 
 		// Generate captcha

@@ -70,26 +70,19 @@ public class LimitedAccessAspect {
 			
 			if (limit > 0) {
 				if (limit >= limitedAccess.frequency()) {
-
 					if (heavy > 0) {
-						
 						heavy++;
-						
-						
 						if(heavy >= limitedAccess.heavyFrequency()) {
 							redisTemplate.opsForValue().set(keyHeavy, heavy.toString(), limitedAccess.heavyDelay(), TimeUnit.SECONDS);
 						}else {
 							redisTemplate.opsForValue().set(keyHeavy, heavy.toString());
 						}
-						
 					} else {
 						redisTemplate.opsForValue().set(keyHeavy, "1", limitedAccess.heavySecond(), TimeUnit.SECONDS);
 					}
-
 					throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					        localeMessageSourceService.getMessage("TRY_IT_LATER"));
 				}
-
 				limit++;
 				redisTemplate.opsForValue().set(key, limit.toString());
 			} else {
