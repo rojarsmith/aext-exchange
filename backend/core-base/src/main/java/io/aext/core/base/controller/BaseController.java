@@ -12,11 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -86,8 +88,19 @@ public class BaseController {
 		}
 	}
 
+	public boolean equalsN(String value) {
+		if (!value.equals("N")) {
+			return false;
+		}
+		return true;
+	}
+
+	public void throwResponseStatusException(String messageSymbol) {
+		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML(messageSymbol));
+	}
+
 	protected ResponseEntity<?> success() {
-		return success("Success", null);
+		return success(getMessageML("SUCCESS"));
 	}
 
 	protected ResponseEntity<?> success(String msg) {
@@ -95,7 +108,7 @@ public class BaseController {
 	}
 
 	protected ResponseEntity<?> success(Object obj) {
-		return success("Success", obj);
+		return success(getMessageML("SUCCESS"), obj);
 	}
 
 	protected ResponseEntity<?> success(String msg, Object obj) {

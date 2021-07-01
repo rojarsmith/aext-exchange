@@ -100,7 +100,7 @@ public class BaseController {
 	}
 
 	protected ResponseEntity<?> success() {
-		return success("Success", null);
+		return success(getMessageML("SUCCESS"));
 	}
 
 	protected ResponseEntity<?> success(String msg) {
@@ -108,7 +108,7 @@ public class BaseController {
 	}
 
 	protected ResponseEntity<?> success(Object obj) {
-		return success("Success", obj);
+		return success(getMessageML("SUCCESS"), obj);
 	}
 
 	protected ResponseEntity<?> success(String msg, Object obj) {

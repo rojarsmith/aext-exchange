@@ -1,8 +1,10 @@
 package io.aext.core.service.controller;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -18,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * @author Rojar Smith
  *
- * @date 2021-06-27
+ * @date 2021-07-01
  */
 @Slf4j
 @ControllerAdvice
@@ -26,6 +28,13 @@ public class ExceptionController extends BaseController {
 
 	@ExceptionHandler(value = { ResponseStatusException.class })
 	public ResponseEntity<?> handleResponseStatusException(ResponseStatusException e) {
+		e.setStackTrace(Arrays.stream(e.getStackTrace())
+				//
+				.filter(ste -> ste.getClassName().startsWith("com.edt.frillback.core"))
+				//
+				.collect(Collectors.toList())
+				//
+				.toArray(new StackTraceElement[0]));
 		log.error("'handleResponseStatusException':", e);
 		Map<String, Object> data = new HashMap<>();
 		data.put("stackTrace", e.getStackTrace());
