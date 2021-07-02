@@ -43,6 +43,13 @@ public class ExceptionController extends BaseController {
 
 	@ExceptionHandler(value = { BindException.class })
 	public ResponseEntity<?> handleValidationException(BindException e) {
+		e.setStackTrace(Arrays.stream(e.getStackTrace())
+				//
+				.filter(ste -> ste.getClassName().startsWith("com.edt.frillback.core"))
+				//
+				.collect(Collectors.toList())
+				//
+				.toArray(new StackTraceElement[0]));
 		log.error("'handleValidationException':", e);
 		BindingResult bindingResult = e.getBindingResult();
 		Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);

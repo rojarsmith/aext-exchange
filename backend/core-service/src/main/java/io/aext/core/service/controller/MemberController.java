@@ -11,7 +11,6 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -73,9 +72,6 @@ public class MemberController extends BaseController {
 
 	@Autowired
 	DataCacheService dataCacheService;
-
-	@Autowired
-	StringRedisTemplate redisTemplate;
 
 	@Autowired
 	LocaleMessageSourceService localeMessageSourceService;

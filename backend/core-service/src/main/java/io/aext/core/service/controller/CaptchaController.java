@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -32,9 +31,6 @@ import io.aext.core.base.util.CaptchaLite;
 @RestController
 @RequestMapping(value = { "/api/v1/captcha" })
 public class CaptchaController extends BaseController {
-	@Autowired
-	StringRedisTemplate redisTemplate;
-
 	@Autowired
 	DataCacheService dataCacheService;
 
