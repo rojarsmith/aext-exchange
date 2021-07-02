@@ -16,7 +16,7 @@ public class PasswordModifyParam {
 	 * SMS, EMAIL
 	 */
 	@NotBlank
-	@ValidVerifyMethod(message = "#{InputNotValid}")
+	@ValidVerifyMethod(message = "{generic.invalid}")
 	private String verifyMethod;
 
 	public boolean isMethodEmail() {

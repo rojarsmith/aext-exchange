@@ -25,7 +25,7 @@ import io.jsonwebtoken.Claims;
 /**
  * @author rojar
  *
- * @date 2021-06-24
+ * @date 2021-07-02
  */
 @Component
 public class LoginFilter extends OncePerRequestFilter {
@@ -50,7 +50,8 @@ public class LoginFilter extends OncePerRequestFilter {
 			// Check token is logout, if token logout return anonymousUser.
 			String tokenHash = SHA2.getSHA256Short(request.getHeader("Authorization"), 0, 8).toUpperCase();
 			ValueOperations valueOperations = redisTemplate.opsForValue();
-			Object cache = Optional.ofNullable(valueOperations.get(JWT_LOGOUT_PREFIX + user.getUsername() + tokenHash))
+			Object cache = Optional
+					.ofNullable(valueOperations.get(JWT_LOGOUT_PREFIX + user.getUsername() + "_" + tokenHash))
 					.orElse("N");
 			if (cache.toString().equals("N")) {
 				user.setJwtHash(tokenHash);

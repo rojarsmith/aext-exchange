@@ -7,15 +7,11 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,17 +19,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.aext.core.base.controller.BaseController;
@@ -49,7 +40,6 @@ import io.aext.core.base.service.EmailContentBuilder;
 import io.aext.core.base.service.EmailSenderService;
 import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
-import io.aext.core.base.util.IpUtils;
 import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.ServiceProperty;
@@ -163,7 +153,7 @@ public class MemberController extends BaseController {
 		String keyToken = REGISTER_ACTIVATE_CODE_PREFIX + member.getUsername();
 		Optional<String> valueToken = dataCacheService.readString(keyToken);
 		if (valueToken.isEmpty()) {
-			throwResponseStatusException(getMessageML("EMAIL_ALREADY_SEND"));
+			throwResponseStatusException("EMAIL_ALREADY_SEND");
 		}
 
 		String token = sendActivateEmail(member);
@@ -214,13 +204,13 @@ public class MemberController extends BaseController {
 		String keyAct = REGISTER_ACTIVATE_CODE_PREFIX + param.getUsername();
 		Optional<String> valueToken = dataCacheService.readString(keyAct);
 		if (valueToken.isEmpty() || !valueToken.get().equals(param.getToken())) {
-			throwResponseStatusException(getMessageML("INVALID_LINK"));
+			throwResponseStatusException("INVALID_LINK");
 		}
 
 		// Get member
 		Optional<Member> member = memberService.findByUsername(param.getUsername());
 		if (!member.isPresent()) {
-			throwResponseStatusException(getMessageML("INVALID_LINK"));
+			throwResponseStatusException("INVALID_LINK");
 		}
 
 		member.get().getMemberLevel().add(MemberStatus.VERIFIED_EMAIL);
@@ -235,9 +225,11 @@ public class MemberController extends BaseController {
 	@ResponseBody
 	@Auth(id = 2, name = "send verify code.")
 	public ResponseEntity<?> verify(VerifyParam param) {
-		// Get member
+		// Get member from context
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		MemberDetails md = (MemberDetails) authentication.getPrincipal();
+
+		// Get member from database
 		Optional<Member> member = memberService.findByUsername(md.getUsername());
 		if (member.isEmpty()) {
 			throwResponseStatusException("SYSTEM_ERROR");
@@ -274,7 +266,7 @@ public class MemberController extends BaseController {
 
 	@RequestMapping("/login")
 	@ResponseBody
-	public ResponseEntity<?> loginEmail(@Valid LoginParam login, BindingResult bindingResult) {
+	public ResponseEntity<?> loginEmail(@Valid LoginParam login) {
 		Authentication token = new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword());
 		Authentication authentication = authenticationManager.authenticate(token);
 		MemberDetails member = (MemberDetails) authentication.getPrincipal();
@@ -294,7 +286,6 @@ public class MemberController extends BaseController {
 	/*
 	 * Standard JWT no concept of logout. This is special.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@RequestMapping("/logout")
 	@ResponseBody
 	public ResponseEntity<?> logout() {
@@ -308,9 +299,8 @@ public class MemberController extends BaseController {
 		} else if (principal.getClass().equals(MemberDetails.class)) {
 			MemberDetails user = (MemberDetails) principal;
 			memberVO.setUsername(user.getUsername());
-			ValueOperations valueOperations = redisTemplate.opsForValue();
-			valueOperations.set(JWT_LOGOUT_PREFIX + user.getUsername() + user.getJwtHash(), "1", 7200,
-					TimeUnit.MINUTES);
+			String key = JWT_LOGOUT_PREFIX + user.getUsername() + "_" + user.getJwtHash();
+			dataCacheService.update(key, "1", 7200 * 60);
 		}
 
 		SecurityContextHolder.clearContext();
@@ -329,30 +319,31 @@ public class MemberController extends BaseController {
 		// Get member from database
 		Optional<Member> omember = memberService.findByUsername(md.getUsername());
 		if (omember.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+			throwResponseStatusException("SYSTEM_ERROR");
 		}
 		Member member = omember.get();
 
 		// Check email sent
 		String keyToken = PASSWORD_RESET_PREFIX + member.getUsername();
-		String valueToken = readRedisValueAsString(keyToken);
-		if (!valueToken.toString().equals("N")) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("EMAIL_ALREADY_SEND"));
+		Optional<String> valueToken = dataCacheService.readString(keyToken);
+		if (valueToken.isPresent()) {
+			throwResponseStatusException("VERIVY_CODE_HAD_BEEN_SENT");
 		}
 		String token = sendFindPasswordEmail(member);
 
-		updateRedisValueAsString(keyToken, token, 600);
+		dataCacheService.update(keyToken, token, 600);
 
 		return success(getMessageML("PROCESS_SUCCESS"));
 	}
 
 	@PostMapping(value = { "/password/forget" })
 	@ResponseBody
-	public ResponseEntity<?> passwordForget(HttpServletRequest request, @Validated PasswordForgetParam param) {
-		String ip = IpUtils.getIpAddr(request);
-		String keyCap = CAPTCHA_TOKEN_PREFIX + ip;
-		String tokenCap = readRedisValueAsString(keyCap);
-		if (!tokenCap.equals(param.getToken())) {
+	public ResponseEntity<?> passwordForget(@Validated PasswordForgetParam param) {
+		// Check cache
+		String ip = getIpAddress();
+		String keyToken = CAPTCHA_TOKEN_PREFIX + ip;
+		Optional<String> valueToken = dataCacheService.readString(keyToken);
+		if (valueToken.isEmpty() || !valueToken.get().equals(param.getToken())) {
 			return error(getMessageML("CAPTCHA_INVALID"));
 		}
 
@@ -383,22 +374,22 @@ public class MemberController extends BaseController {
 			omember = memberService.findByUsername(identityFeatures);
 		}
 		if (omember.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("FIND_ERROR"));
+			throwResponseStatusException("INPUT_UNAVAILABILITY");
 		}
 		Member member = omember.get();
 
 		// Read cache
 		String keyV = PASSWORD_RESET_PREFIX + member.getUsername();
-		String tokenV = readRedisValueAsString(keyV);
-		if (!tokenV.equals("N")) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("TRY_IT_LATER"));
+		Optional<String> tokenV = dataCacheService.readString(keyV);
+		if (tokenV.isPresent()) {
+			throwResponseStatusException("TRY_IT_LATER");
 		}
 
 		String token = sendFindPasswordEmail(member);
 
-		updateRedisValueAsString(keyV, token, 600);
+		dataCacheService.update(keyV, token, 600);
 
-		return success(getMessageML("PROCESS_SUCCESS"));
+		return success(getMessageML("VERIVY_CODE_HAD_BEEN_SENT"));
 	}
 
 	String sendFindPasswordEmail(Member member) {
@@ -439,41 +430,22 @@ public class MemberController extends BaseController {
 	public ResponseEntity<?> passwordReset(@Valid PasswordResetParam param) {
 		// Read cache
 		String keyV = PASSWORD_RESET_PREFIX + param.getUsername();
-		String tokenV = readRedisValueAsString(keyV);
-		if (!tokenV.equals(param.getToken())) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("TOKEN_INVALID"));
+		Optional<String> tokenV = dataCacheService.readString(keyV);
+		if (tokenV.isEmpty() || !tokenV.get().equals(param.getToken())) {
+			throwResponseStatusException("TOKEN_INVALID");
 		}
 
 		Optional<Member> omember = memberService.findByUsername(param.getUsername());
 		if (omember.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+			throwResponseStatusException("SYSTEM_ERROR");
 		}
 		Member member = omember.get();
 
 		member.setPassword(passwordEncoder.encode(param.getPassword()));
 		memberService.update(member);
 
-		deleteRedisValueAsString(keyV);
+		dataCacheService.delete(keyV);
 
-		return success(getMessageML("PROCESS_SUCCESS"));
-	}
-
-	@PutMapping("/test")
-	@ResponseBody
-	@Auth(id = 98, name = "create new user")
-	public ResponseEntity<?> test() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		authentication.getPrincipal();
-		return success(authentication);
-	}
-
-	@GetMapping("/test2")
-	@ResponseBody
-	@DeleteMapping
-	@Auth(id = 99, name = "delete the user")
-	public ResponseEntity<?> test2() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		authentication.getPrincipal();
-		return success(authentication);
+		return success();
 	}
 }
