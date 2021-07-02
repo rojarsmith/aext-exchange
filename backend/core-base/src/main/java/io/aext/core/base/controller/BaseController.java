@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -24,6 +26,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import io.aext.core.base.model.vo.ResultVO;
 import io.aext.core.base.service.LocaleMessageSourceService;
+import io.aext.core.base.util.IpUtils;
 
 /**
  * @author Rojar Smith
@@ -86,6 +89,11 @@ public class BaseController {
 			e.toString();
 			return "No message.";
 		}
+	}
+
+	protected String getIpAddress() {
+		ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		return IpUtils.getIpAddr(attributes.getRequest());
 	}
 
 	public boolean equalsN(String value) {

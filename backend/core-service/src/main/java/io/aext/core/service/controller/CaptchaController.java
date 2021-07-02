@@ -25,6 +25,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.security.LimitedAccess;
+import io.aext.core.base.service.DataCacheService;
 import io.aext.core.base.util.CaptchaLite;
 import io.aext.core.base.util.IpUtils;
 
@@ -39,13 +40,15 @@ public class CaptchaController extends BaseController {
 	@Autowired
 	StringRedisTemplate redisTemplate;
 
+	@Autowired
+	DataCacheService dataCacheService;
+
 	@PostMapping(value = { "/new/png" }, produces = "image/png")
 	@ResponseBody
 	@LimitedAccess(frequency = 1, second = 1, heavyFrequency = 10, heavySecond = 60, heavyDelay = 86400)
 	public BufferedImage newImage() {
 		// Check cache
-		ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-		String ip = IpUtils.getIpAddr(attributes.getRequest());
+		String ip = getIpAddress();
 		String keyToken = CAPTCHA_TOKEN_PREFIX + ip;
 
 		// Generate captcha
@@ -55,7 +58,7 @@ public class CaptchaController extends BaseController {
 		BufferedImage image = (BufferedImage) captcha.get(1);
 
 		// Update cache
-		updateRedisValueAsString(keyToken, token, 600);
+		dataCacheService.update(keyToken, token, 600);
 
 		return image;
 	}
@@ -63,9 +66,9 @@ public class CaptchaController extends BaseController {
 	@PostMapping(value = { "/new/base64" })
 	@ResponseBody
 	@LimitedAccess(frequency = 1, second = 1, heavyFrequency = 10, heavySecond = 60, heavyDelay = 86400)
-	public ResponseEntity<?> newBase64(HttpServletRequest request) {
+	public ResponseEntity<?> newBase64() {
 		// Check cache
-		String ip = IpUtils.getIpAddr(request);
+		String ip = getIpAddress();
 		String keyToken = CAPTCHA_TOKEN_PREFIX + ip;
 
 		// Generate captcha
@@ -77,7 +80,7 @@ public class CaptchaController extends BaseController {
 		data.put("image", "data:image/png;base64," + image);
 
 		// Update cache
-		updateRedisValueAsString(keyToken, token, 600);
+		dataCacheService.update(keyToken, token, 600);
 
 		return success(data);
 	}

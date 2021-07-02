@@ -50,9 +50,6 @@ public class LimitedAccessAspect {
 			String methodName = point.getSignature().getName();
 			HttpServletRequest request = attributes.getRequest();
 			String remoteAddr = request.getRemoteAddr();
-			if (remoteAddr.contains(":")) {
-				remoteAddr = remoteAddr.replace(":", ".");
-			}
 			log.info("remoteAddr：" + remoteAddr);
 
 			String key = LIMITED_ACCESS_ASPECT_PREFIX + className + "." + methodName + "@" + remoteAddr;
@@ -63,25 +60,26 @@ public class LimitedAccessAspect {
 			Long limit = value == "N" ? 0 : Long.parseLong(value);
 			Long heavy = valueHeavy == "N" ? 0 : Long.parseLong(valueHeavy);
 
-			if(heavy >= limitedAccess.heavyFrequency()) {
+			if (heavy >= limitedAccess.heavyFrequency()) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-				        localeMessageSourceService.getMessage("TRY_IT_TOMORROW"));
+						localeMessageSourceService.getMessage("TRY_IT_TOMORROW"));
 			}
-			
+
 			if (limit > 0) {
 				if (limit >= limitedAccess.frequency()) {
 					if (heavy > 0) {
 						heavy++;
-						if(heavy >= limitedAccess.heavyFrequency()) {
-							redisTemplate.opsForValue().set(keyHeavy, heavy.toString(), limitedAccess.heavyDelay(), TimeUnit.SECONDS);
-						}else {
+						if (heavy >= limitedAccess.heavyFrequency()) {
+							redisTemplate.opsForValue().set(keyHeavy, heavy.toString(), limitedAccess.heavyDelay(),
+									TimeUnit.SECONDS);
+						} else {
 							redisTemplate.opsForValue().set(keyHeavy, heavy.toString());
 						}
 					} else {
 						redisTemplate.opsForValue().set(keyHeavy, "1", limitedAccess.heavySecond(), TimeUnit.SECONDS);
 					}
 					throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					        localeMessageSourceService.getMessage("TRY_IT_LATER"));
+							localeMessageSourceService.getMessage("TRY_IT_LATER"));
 				}
 				limit++;
 				redisTemplate.opsForValue().set(key, limit.toString());
@@ -92,4 +90,3 @@ public class LimitedAccessAspect {
 		return point.proceed();
 	}
 }
-
