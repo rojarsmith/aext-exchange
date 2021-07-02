@@ -6,8 +6,6 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -148,64 +146,31 @@ public class MemberController extends BaseController {
 		return success(getMessageML("SEND_REGISTER_ACTIVATE_CODE_SUCCESS"));
 	}
 
-	@RequestMapping(value = { "/activate" }, method = { RequestMethod.GET })
-	@LimitedAccess(frequency = 5, second = 30, heavyFrequency = 10, heavySecond = 60, heavyDelay = 86400)
-	public ResponseEntity<?> activate(@Valid ActivateParam param) {
-		// Check token
-		String keyAct = REGISTER_ACTIVATE_CODE_PREFIX + param.getUsername();
-		Optional<String> valueToken = dataCacheService.readString(keyAct);
-		if (valueToken.isEmpty() || !valueToken.get().equals(param.getToken())) {
-			throwResponseStatusException(getMessageML("INVALID_LINK"));
-		}
-
-		Optional<Member> member = memberService.findByUsername(param.getUsername());
-		if (!member.isPresent()) {
-			throwResponseStatusException(getMessageML("INVALID_LINK"));
-		}
-
-		member.get().getMemberLevel().add(MemberStatus.VERIFIED_EMAIL);
-		memberService.update(member.get());
-
-		dataCacheService.delete(keyAct);
-
-		return success();
-	}
-
 	@PostMapping(value = { "/reactivate" })
 	@ResponseBody
 	@Auth(id = 1, name = "active again.")
-	public ResponseEntity<?> reactivate(@Validated ReactivateParam param, BindingResult bindingResult) {
-		if (bindingResult.hasErrors()) {
-			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
-			return error(getMessageML("PARAMS_INVALID"), data);
-		}
-
-		if (!param.isMethodValid()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
-		}
-
+	public ResponseEntity<?> reactivate(@Validated ReactivateParam param) {
+		// Get member
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		MemberDetails md = (MemberDetails) authentication.getPrincipal();
-
 		Optional<Member> omember = memberService.findByUsername(md.getUsername());
 		if (omember.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("SYSTEM_ERROR"));
+			throwResponseStatusException("SYSTEM_ERROR");
 		}
 		Member member = omember.get();
 
-		// Read cache
-		String key = REGISTER_ACTIVATE_CODE_PREFIX + member.getUsername();
-		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		Object tokenStored = Optional.ofNullable(valueOperations.get(key)).orElse("N");
-		if (!tokenStored.toString().equals("N")) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, getMessageML("EMAIL_ALREADY_SEND"));
+		// Read token
+		String keyToken = REGISTER_ACTIVATE_CODE_PREFIX + member.getUsername();
+		Optional<String> valueToken = dataCacheService.readString(keyToken);
+		if (valueToken.isEmpty()) {
+			throwResponseStatusException(getMessageML("EMAIL_ALREADY_SEND"));
 		}
 
 		String token = sendActivateEmail(member);
 
-		valueOperations.set(REGISTER_ACTIVATE_CODE_PREFIX + member.getUsername(), token, 10, TimeUnit.MINUTES);
+		dataCacheService.update(keyToken, token, 600);
 
-		return success("Check email.");
+		return success(getMessageML("SEND_REGISTER_ACTIVATE_CODE_SUCCESS"));
 	}
 
 	String sendActivateEmail(Member member) {
@@ -242,52 +207,53 @@ public class MemberController extends BaseController {
 		return token;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@RequestMapping(value = { "/activate" }, method = { RequestMethod.GET })
+	@LimitedAccess(frequency = 5, second = 30, heavyFrequency = 10, heavySecond = 60, heavyDelay = 86400)
+	public ResponseEntity<?> activate(@Valid ActivateParam param) {
+		// Check token
+		String keyAct = REGISTER_ACTIVATE_CODE_PREFIX + param.getUsername();
+		Optional<String> valueToken = dataCacheService.readString(keyAct);
+		if (valueToken.isEmpty() || !valueToken.get().equals(param.getToken())) {
+			throwResponseStatusException(getMessageML("INVALID_LINK"));
+		}
+
+		// Get member
+		Optional<Member> member = memberService.findByUsername(param.getUsername());
+		if (!member.isPresent()) {
+			throwResponseStatusException(getMessageML("INVALID_LINK"));
+		}
+
+		member.get().getMemberLevel().add(MemberStatus.VERIFIED_EMAIL);
+		memberService.update(member.get());
+
+		dataCacheService.delete(keyAct);
+
+		return success(getMessageML("ACCOUNT_ACTIVATE_SUCCESS"));
+	}
+
 	@PostMapping(value = "/verify")
 	@ResponseBody
 	@Auth(id = 2, name = "send verify code.")
-	public ResponseEntity<?> verify(VerifyParam param, BindingResult bindingResult) {
-		if (bindingResult.hasErrors()) {
-			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
-			String meesage = localeMessageSourceService.getMessage("SYSTEM_ERROR");
-
-			return error(meesage, data);
-		}
-
-		String method = param.getMethod().toUpperCase();
-
-		if (!method.equals("EMAIL")
-				//
-				&& !method.equals("SMS")) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("SYSTEM_ERROR"));
-		}
-
+	public ResponseEntity<?> verify(VerifyParam param) {
+		// Get member
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		MemberDetails md = (MemberDetails) authentication.getPrincipal();
-
 		Optional<Member> member = memberService.findByUsername(md.getUsername());
 		if (member.isEmpty()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("MEMBER_NOT_EXISTS"));
+			throwResponseStatusException("SYSTEM_ERROR");
 		}
 		if (!StringUtils.hasText(member.get().getEmail()) || !ValueValidate.validateEmail(member.get().getEmail())) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("EMAIL_CAN_NOT_USE"));
+			throwResponseStatusException("EMAIL_CAN_NOT_USE");
 		}
 
-		String key = EMAIL_VERIFY_CODE_PREFIX + param.getType() + "_" + member.get().getUsername();
-		ValueOperations valueOperations = redisTemplate.opsForValue();
-		Object cache = Optional.ofNullable(
-				//
-				valueOperations.get(key)).orElse("N");
-		if (!cache.toString().equals("N")) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("EMAIL_ALREADY_SEND"));
+		String keyToken = EMAIL_VERIFY_CODE_PREFIX + param.getAction() + "_" + member.get().getUsername();
+		Optional<String> valueToken = dataCacheService.readString(keyToken);
+		if (valueToken.isPresent()) {
+			throwResponseStatusException("VERIVY_CODE_HAD_BEEN_SENT");
 		}
 		String code = SHA2.getSHA256VerifyLen6();
 
-		if (method.equals("EMAIL")) {
+		if (param.isMethodEmail()) {
 			// Send Mail
 			String subject = localeMessageSourceService.getMessage("EMAIL_VERIFICATION_CODE_TITLE");
 			String[] mailList = { member.get().getEmail() };
@@ -301,9 +267,9 @@ public class MemberController extends BaseController {
 			}
 		}
 
-		valueOperations.set(key, code, 10, TimeUnit.MINUTES);
+		dataCacheService.update(keyToken, code, 600);
 
-		return success();
+		return success(getMessageML("VERIVY_CODE_HAD_BEEN_SENT"));
 	}
 
 	@RequestMapping("/login")

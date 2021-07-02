@@ -2,6 +2,7 @@ package io.aext.core.service.model.param;
 
 import javax.validation.constraints.NotBlank;
 
+import io.aext.core.service.model.param.validator.ValidVerifyMethod;
 import lombok.Data;
 
 /**
@@ -11,12 +12,24 @@ import lombok.Data;
  */
 @Data
 public class VerifyParam {
-	@NotBlank
-	String type;
+	/*
+	 * Function action
+	 */
+	@NotBlank(message = "{generic.invalid}")
+	String action;
 
 	/*
 	 * SMS, EMAIL
 	 */
 	@NotBlank
-	String method;
+	@ValidVerifyMethod(message = "{generic.invalid}")
+	String verifyMethod;
+
+	public boolean isMethodEmail() {
+		return this.verifyMethod.toUpperCase().equals("EMAIL");
+	}
+
+	public boolean isMethodSMS() {
+		return this.verifyMethod.toUpperCase().equals("SMS");
+	}
 }
