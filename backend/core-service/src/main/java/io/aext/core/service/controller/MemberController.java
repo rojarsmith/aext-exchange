@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -45,6 +44,9 @@ import io.aext.core.base.model.entity.Member;
 import io.aext.core.base.model.vo.ECActiveConfirmVO;
 import io.aext.core.base.model.vo.ECFindPasswordVO;
 import io.aext.core.base.model.vo.ECVerifyCodeVO;
+import io.aext.core.base.model.vo.ValidResultVO;
+import io.aext.core.base.security.LimitedAccess;
+import io.aext.core.base.service.DataCacheService;
 import io.aext.core.base.service.EmailContentBuilder;
 import io.aext.core.base.service.EmailSenderService;
 import io.aext.core.base.service.LocaleMessageSourceService;
@@ -55,6 +57,7 @@ import io.aext.core.base.util.ValueValidate;
 import io.aext.core.service.ServiceProperty;
 import io.aext.core.service.model.param.PasswordModifyParam;
 import io.aext.core.service.model.param.PasswordResetParam;
+import io.aext.core.service.model.param.ActivateParam;
 import io.aext.core.service.model.param.LoginParam;
 import io.aext.core.service.model.param.PasswordForgetParam;
 import io.aext.core.service.model.param.ReactivateParam;
@@ -79,6 +82,9 @@ public class MemberController extends BaseController {
 
 	@Autowired
 	PasswordEncoder passwordEncoder;
+
+	@Autowired
+	DataCacheService dataCacheService;
 
 	@Autowired
 	StringRedisTemplate redisTemplate;
@@ -106,86 +112,61 @@ public class MemberController extends BaseController {
 	 */
 	@RequestMapping("/register")
 	@ResponseBody
-	public ResponseEntity<?> register(HttpServletRequest request, @Valid RegisterParam register,
-			BindingResult bindingResult) {
-		// check IP
-		String ip = IpUtils.getIpAddr(request);
-		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		Object cache = Optional.ofNullable(valueOperations.get(IP_REGISTER_DELAY_PREFIX + ip)).orElse("N");
-		if (!cache.toString().equals("N")) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Try it next time.");
+	@LimitedAccess(frequency = 10, second = 30, heavyFrequency = 10, heavySecond = 60, heavyDelay = 86400)
+	public ResponseEntity<?> register(@Valid RegisterParam param) {
+		ValidResultVO vrVO = new ValidResultVO();
+		if (memberService.isUsernameExist(param.getUsername())) {
+			vrVO.add("field", "username", getMessageML("USERNAME_ALREADY_EXISTS"));
 		}
-
-		if (bindingResult.hasErrors()) {
-			Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
-			String meesage = localeMessageSourceService.getMessage("REGISTRATION_FAILED");
-
-			return error(meesage, data);
+		if (memberService.isEmailExist(param.getEmail())) {
+			vrVO.add("field", "email", getMessageML("EMAIL_CAN_NOT_USE"));
 		}
-
-		if (memberService.isUsernameExist(register.getUsername())) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("USERNAME_ALREADY_EXISTS"));
-		}
-		if (memberService.isUsernameExist(register.getEmail())) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("EMAIL_CAN_NOT_USE"));
-		}
-		if (!register.getMethod().toUpperCase().equals("EMAIL")
-				//
-				&& !register.getMethod().toUpperCase().equals("SMS")) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("SYSTEM_ERROR"));
+		if (vrVO.isError()) {
+			return error(getMessageML("PARAMS_INVALID"), vrVO.getData());
 		}
 
 		// Check sent
-		Object cacheAct = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVATE_CODE_PREFIX + register.getUsername()))
-				.orElse("N");
-		if (!cacheAct.toString().equals("N")) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("EMAIL_ALREADY_SEND"));
+		String keyAct = REGISTER_ACTIVATE_CODE_PREFIX + param.getUsername();
+		Optional<String> valueToken = dataCacheService.readString(keyAct);
+		if (valueToken.isPresent()) {
+			return error(getMessageML("EMAIL_ALREADY_SEND"));
 		}
 
 		// Creating user's account
 		Member member = new Member();
-		member.setUsername(register.getUsername());
-		member.setPassword(passwordEncoder.encode(register.getPassword()));
-		member.setEmail(register.getEmail());
+		member.setUsername(param.getUsername());
+		member.setPassword(passwordEncoder.encode(param.getPassword()));
+		member.setEmail(param.getEmail());
 		member.setRegistTime(Instant.now());
 		member.setMemberLevel(EnumSet.of(MemberStatus.REGISTERD));
 		memberService.update(member);
 
 		String token = sendActivateEmail(member);
 
-		valueOperations.set(EMAIL_ACTIVATE_CODE_PREFIX + register.getUsername(), token, 10, TimeUnit.MINUTES);
-		valueOperations.set(IP_REGISTER_DELAY_PREFIX + ip, "1", 60, TimeUnit.MINUTES);
+		dataCacheService.update(keyAct, token, 600);
 
-		return success(localeMessageSourceService.getMessage("SEND_REGISTER_EMAIL_SUCCESS"));
+		return success(getMessageML("SEND_REGISTER_ACTIVATE_CODE_SUCCESS"));
 	}
 
 	@RequestMapping(value = { "/activate" }, method = { RequestMethod.GET })
-	public ResponseEntity<?> activate(
-			//
-			@Valid @RequestParam(value = "username", required = true) String username,
-			@Valid @RequestParam(value = "token", required = true) String token) {
-		// Read cache
-		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		Object cache = Optional.ofNullable(valueOperations.get(EMAIL_ACTIVATE_CODE_PREFIX + username)).orElse("N");
-		if (cache.toString().equals("N") || !cache.toString().equals(token)) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("INVALID_LINK"));
+	@LimitedAccess(frequency = 5, second = 30, heavyFrequency = 10, heavySecond = 60, heavyDelay = 86400)
+	public ResponseEntity<?> activate(@Valid ActivateParam param) {
+		// Check token
+		String keyAct = REGISTER_ACTIVATE_CODE_PREFIX + param.getUsername();
+		Optional<String> valueToken = dataCacheService.readString(keyAct);
+		if (valueToken.isEmpty() || !valueToken.get().equals(param.getToken())) {
+			throwResponseStatusException(getMessageML("INVALID_LINK"));
 		}
 
-		Optional<Member> member = memberService.findByUsername(username);
+		Optional<Member> member = memberService.findByUsername(param.getUsername());
 		if (!member.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					localeMessageSourceService.getMessage("INVALID_LINK"));
+			throwResponseStatusException(getMessageML("INVALID_LINK"));
 		}
 
 		member.get().getMemberLevel().add(MemberStatus.VERIFIED_EMAIL);
 		memberService.update(member.get());
 
-		valueOperations.getOperations().delete(EMAIL_ACTIVATE_CODE_PREFIX + username);
+		dataCacheService.delete(keyAct);
 
 		return success();
 	}
@@ -213,7 +194,7 @@ public class MemberController extends BaseController {
 		Member member = omember.get();
 
 		// Read cache
-		String key = EMAIL_ACTIVATE_CODE_PREFIX + member.getUsername();
+		String key = REGISTER_ACTIVATE_CODE_PREFIX + member.getUsername();
 		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
 		Object tokenStored = Optional.ofNullable(valueOperations.get(key)).orElse("N");
 		if (!tokenStored.toString().equals("N")) {
@@ -222,7 +203,7 @@ public class MemberController extends BaseController {
 
 		String token = sendActivateEmail(member);
 
-		valueOperations.set(EMAIL_ACTIVATE_CODE_PREFIX + member.getUsername(), token, 10, TimeUnit.MINUTES);
+		valueOperations.set(REGISTER_ACTIVATE_CODE_PREFIX + member.getUsername(), token, 10, TimeUnit.MINUTES);
 
 		return success("Check email.");
 	}
@@ -247,7 +228,7 @@ public class MemberController extends BaseController {
 		}
 
 		// Send Mail
-		String subject = localeMessageSourceService.getMessage("EMAIL_ACTIVATION_CONFIRM_TITLE");
+		String subject = getMessageML("TITLE_ACTIVATION_AEXT_ACCOUNT");
 		String[] mailList = { member.getEmail() };
 		ECActiveConfirmVO content = new ECActiveConfirmVO();
 		content.setSubject(subject);

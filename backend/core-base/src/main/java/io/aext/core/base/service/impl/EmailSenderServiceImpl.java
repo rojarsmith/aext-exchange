@@ -9,6 +9,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import io.aext.core.base.service.EmailSenderService;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Rojar Smith
@@ -16,6 +17,7 @@ import io.aext.core.base.service.EmailSenderService;
  * @date 2021-07-02
  */
 @Service
+@Slf4j
 public class EmailSenderServiceImpl implements EmailSenderService {
 	private JavaMailSender javaMailSender;
 
@@ -28,7 +30,7 @@ public class EmailSenderServiceImpl implements EmailSenderService {
 		try {
 			javaMailSender.send(email);
 		} catch (Exception e) {
-			e.getMessage();
+			log.error(e.getMessage());
 		}
 	}
 
@@ -44,7 +46,7 @@ public class EmailSenderServiceImpl implements EmailSenderService {
 
 			javaMailSender.send(message);
 		} catch (Exception e) {
-			e.getMessage();
+			log.error(e.getMessage());
 		}
 	}
 }

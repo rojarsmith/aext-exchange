@@ -51,10 +51,16 @@ public class ExceptionController extends BaseController {
 
 	@ExceptionHandler(value = { Exception.class })
 	public ResponseEntity<?> handleException(Exception e) {
+		e.setStackTrace(Arrays.stream(e.getStackTrace())
+				//
+				.filter(ste -> ste.getClassName().startsWith("com.edt.frillback.core"))
+				//
+				.collect(Collectors.toList())
+				//
+				.toArray(new StackTraceElement[0]));
 		log.error("'handleException':", e);
 		Map<String, Object> data = new HashMap<>();
 		data.put("stackTrace", e.getStackTrace());
 		return ResponseEntity.badRequest().body(new ResultVO<Map<String, Object>>(e.getMessage(), data));
 	}
-
 }

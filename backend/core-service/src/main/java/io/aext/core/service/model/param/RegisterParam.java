@@ -5,6 +5,7 @@ import javax.validation.constraints.NotBlank;
 
 import org.hibernate.validator.constraints.Length;
 
+import io.aext.core.service.model.param.validator.ValidVerifyMethod;
 import lombok.Data;
 
 /**
@@ -14,26 +15,35 @@ import lombok.Data;
  */
 @Data
 public class RegisterParam {
-	@NotBlank(message = "{Register.username.null}")
-	@Length(min = 3, max = 20, message = "{Register.username.length}")
-	private String username;
+	@NotBlank(message = "{username.null}")
+	@Length(min = 3, max = 20, message = "{username.length}")
+	String username;
 
-	@NotBlank(message = "{Register.password.null}")
-	@Length(min = 6, max = 20, message = "{Register.password.length}")
-	private String password;
+	@NotBlank(message = "{password.null}")
+	@Length(min = 6, max = 20, message = "{password.length}")
+	String password;
 
-	@NotBlank(message = "{Register.email.null}")
-	@Email(message = "{Register.email.format}")
-	private String email;
+	@NotBlank(message = "{email.null}")
+	@Email(message = "{email.format}")
+	String email;
 
-	private String promotion;
+	String promotion;
 
-	@NotBlank(message = "{Register.verify.null}")
-	private String verify;
+	@NotBlank(message = "{verify.null}")
+	String verify;
 
 	/*
 	 * SMS, EMAIL
 	 */
 	@NotBlank
-	private String method;
+	@ValidVerifyMethod(message = "{generic.invalid}")
+	String verifyMethod;
+
+	public boolean isMethodEmail() {
+		return this.verifyMethod.toUpperCase().equals("EMAIL");
+	}
+
+	public boolean isMethodSMS() {
+		return this.verifyMethod.toUpperCase().equals("SMS");
+	}
 }

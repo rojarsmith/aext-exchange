@@ -28,12 +28,12 @@ public class SystemConstant {
 	 */
 	public static final String EMAIL_VERIFY_CODE_PREFIX = "EMAIL_VERIFY_CODE_";
 
-	public static final String EMAIL_ACTIVATE_CODE_PREFIX = "EMAIL_ACTIVE_CODE_";
+	public static final String REGISTER_ACTIVATE_CODE_PREFIX = "REGISTER_ACTIVE_CODE_";
 
 	/**
 	 * Captcha
 	 */
 	// Anti DDoS
-	public static final String CAPTCHA_IP_DELAY_PREFIX = "CAPTCHA_IP_DELAY_";
+//	public static final String CAPTCHA_IP_DELAY_PREFIX = "CAPTCHA_IP_DELAY_";
 	public static final String CAPTCHA_TOKEN_PREFIX = "CAPTCHA_TOKEN_";
 }

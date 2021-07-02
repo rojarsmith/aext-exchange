@@ -15,6 +15,9 @@ public class ValidVerifyMethodValidator implements ConstraintValidator<ValidVeri
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
+		if (value == null) {
+			return false;
+		}
 		if (value.toUpperCase().equals("EMAIL")
 				//
 				|| value.toUpperCase().equals("SMS")) {
