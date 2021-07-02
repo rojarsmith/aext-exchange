@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -20,19 +18,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.security.LimitedAccess;
 import io.aext.core.base.service.DataCacheService;
 import io.aext.core.base.util.CaptchaLite;
-import io.aext.core.base.util.IpUtils;
 
 /**
  * @author Rojar Smith
  * @Description:
- * @date 2021/07/01
+ * @date 2021/07/02
  */
 @RestController
 @RequestMapping(value = { "/api/v1/captcha" })
