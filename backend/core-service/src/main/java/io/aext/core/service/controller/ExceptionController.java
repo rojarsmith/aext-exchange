@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -15,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.model.vo.ResultVO;
+import io.aext.core.service.ServiceProperty;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ControllerAdvice
 public class ExceptionController extends BaseController {
+	@Autowired
+	ServiceProperty serviceProperty;
 
 	@ExceptionHandler(value = { ResponseStatusException.class })
 	public ResponseEntity<?> handleResponseStatusException(ResponseStatusException e) {
@@ -35,7 +39,6 @@ public class ExceptionController extends BaseController {
 				.collect(Collectors.toList())
 				//
 				.toArray(new StackTraceElement[0]));
-		log.error("'handleResponseStatusException':", e);
 		Map<String, Object> data = new HashMap<>();
 		data.put("stackTrace", e.getStackTrace());
 		return ResponseEntity.badRequest().body(new ResultVO<Map<String, Object>>(e.getReason(), data));
@@ -50,7 +53,6 @@ public class ExceptionController extends BaseController {
 				.collect(Collectors.toList())
 				//
 				.toArray(new StackTraceElement[0]));
-		log.error("'handleValidationException':", e);
 		BindingResult bindingResult = e.getBindingResult();
 		Map<String, List<Map<String, String>>> data = buildBindingResultData(bindingResult);
 		return error(getMessageML("PARAMS_INVALID"), data);
@@ -67,7 +69,9 @@ public class ExceptionController extends BaseController {
 				.toArray(new StackTraceElement[0]));
 		log.error("'handleException':", e);
 		Map<String, Object> data = new HashMap<>();
-		data.put("stackTrace", e.getStackTrace());
+		if (serviceProperty.isDev()) {
+			data.put("stackTrace", e.getStackTrace());
+		}
 		return ResponseEntity.badRequest().body(new ResultVO<Map<String, Object>>(e.getMessage(), data));
 	}
 }
