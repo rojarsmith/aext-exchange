@@ -1,4 +1,4 @@
-package io.aext.core.base.service.email;
+package io.aext.core.base.model.vo;
 
 import lombok.Data;
 
@@ -8,6 +8,6 @@ import lombok.Data;
  * @date 2021-06-07
  */
 @Data
-public abstract class MCBase {
+public abstract class ECBaseVO {
 	String subject;
 }

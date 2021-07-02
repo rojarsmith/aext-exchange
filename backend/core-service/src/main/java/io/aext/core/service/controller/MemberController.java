@@ -42,13 +42,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import io.aext.core.base.controller.BaseController;
 import io.aext.core.base.enums.MemberStatus;
 import io.aext.core.base.model.entity.Member;
+import io.aext.core.base.model.vo.ECActiveConfirmVO;
+import io.aext.core.base.model.vo.ECFindPasswordVO;
+import io.aext.core.base.model.vo.ECVerifyCodeVO;
+import io.aext.core.base.service.EmailContentBuilder;
+import io.aext.core.base.service.EmailSenderService;
 import io.aext.core.base.service.LocaleMessageSourceService;
 import io.aext.core.base.service.MemberService;
-import io.aext.core.base.service.email.EmailSenderService;
-import io.aext.core.base.service.email.MCActiveConfirm;
-import io.aext.core.base.service.email.MCFindPassword;
-import io.aext.core.base.service.email.MCVerifyCode;
-import io.aext.core.base.service.email.MailContentBuilder;
 import io.aext.core.base.util.IpUtils;
 import io.aext.core.base.util.SHA2;
 import io.aext.core.base.util.ValueValidate;
@@ -93,7 +93,7 @@ public class MemberController extends BaseController {
 	EmailSenderService emailSenderService;
 
 	@Autowired
-	MailContentBuilder mailContentBuilder;
+	EmailContentBuilder mailContentBuilder;
 
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -249,7 +249,7 @@ public class MemberController extends BaseController {
 		// Send Mail
 		String subject = localeMessageSourceService.getMessage("EMAIL_ACTIVATION_CONFIRM_TITLE");
 		String[] mailList = { member.getEmail() };
-		MCActiveConfirm content = new MCActiveConfirm();
+		ECActiveConfirmVO content = new ECActiveConfirmVO();
 		content.setSubject(subject);
 		content.setConfirmUrl(locationConfirm.toString());
 		Optional<String> mailContent = mailContentBuilder.generateMailContent(content);
@@ -310,7 +310,7 @@ public class MemberController extends BaseController {
 			// Send Mail
 			String subject = localeMessageSourceService.getMessage("EMAIL_VERIFICATION_CODE_TITLE");
 			String[] mailList = { member.get().getEmail() };
-			MCVerifyCode mcVerifyCode = new MCVerifyCode();
+			ECVerifyCodeVO mcVerifyCode = new ECVerifyCodeVO();
 			mcVerifyCode.setSubject(subject);
 			mcVerifyCode.setCode(code);
 			Optional<String> mailContent = mailContentBuilder.generateMailContent(mcVerifyCode);
@@ -475,7 +475,7 @@ public class MemberController extends BaseController {
 		// Send Mail
 		String subject = localeMessageSourceService.getMessage("RESET_PASSWORD_TITLE");
 		String[] mailList = { member.getEmail() };
-		MCFindPassword content = new MCFindPassword();
+		ECFindPasswordVO content = new ECFindPasswordVO();
 		content.setSubject(subject);
 		content.setConfirmUrl(locationConfirm.toString());
 		Optional<String> mailContent = mailContentBuilder.generateMailContent(content);

@@ -1,4 +1,4 @@
-package io.aext.core.base.service.email;
+package io.aext.core.base.model.vo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,6 +10,6 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MCVerifyCode extends MCBase {
+public class ECVerifyCodeVO extends ECBaseVO {
 	String code;
 }

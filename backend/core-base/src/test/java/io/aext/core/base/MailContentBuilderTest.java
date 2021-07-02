@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import io.aext.core.base.service.email.MCVerifyCode;
-import io.aext.core.base.service.email.MailContentBuilder;
+import io.aext.core.base.model.vo.ECVerifyCodeVO;
+import io.aext.core.base.service.EmailContentBuilder;
 
 /**
  * @author rojar
@@ -22,11 +22,11 @@ import io.aext.core.base.service.email.MailContentBuilder;
 @ContextConfiguration({ "classpath:spring-service.xml" })
 public class MailContentBuilderTest {
 	@Autowired
-	MailContentBuilder mailContentBuilder;
+	EmailContentBuilder mailContentBuilder;
 
 	@Test
 	public void commonTest() {
-		MCVerifyCode mcVerifyCode = new MCVerifyCode();
+		ECVerifyCodeVO mcVerifyCode = new ECVerifyCodeVO();
 		mcVerifyCode.setSubject("TESTかいはつ");
 		mcVerifyCode.setCode("123456");
 		Optional<String> context1 = mailContentBuilder.generateMailContent(mcVerifyCode);
