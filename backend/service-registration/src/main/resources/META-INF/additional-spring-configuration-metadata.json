@@ -1,19 +1,24 @@
 {
 	"properties": [
-	       {
-            "name": "logback.path",
-            "type": "java.lang.String",
-            "description": "For logback."
-        },
+		{
+			"name": "logback.path",
+			"type": "java.lang.String",
+			"description": "For logback."
+		},
 		{
 			"name": "service.admins.email",
 			"type": "java.lang.String",
 			"description": "Receive system email, using , to seperate multi user."
 		},
-		      {
-            "name": "service.company",
-            "type": "java.lang.String",
-            "description": ""
-        }
+		{
+			"name": "service.company",
+			"type": "java.lang.String",
+			"description": ""
+		},
+		{
+			"name": "service.alarm.email.suppress",
+			"type": "java.lang.String",
+			"description": ""
+		}
 	]
 }

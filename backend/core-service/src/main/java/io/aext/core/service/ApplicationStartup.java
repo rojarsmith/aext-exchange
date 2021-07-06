@@ -32,6 +32,7 @@ import io.aext.core.base.service.PermissionService;
 import io.aext.core.base.service.RoleService;
 import io.aext.core.service.security.Auth;
 import io.aext.core.service.security.SecurityMetadataSourceImpl;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author rojar
@@ -39,6 +40,7 @@ import io.aext.core.service.security.SecurityMetadataSourceImpl;
  * @date 2021-06-26
  */
 @Component
+@Slf4j
 public class ApplicationStartup implements ApplicationRunner {
 	@Autowired
 	ServiceProperty serviceProperty;
@@ -63,6 +65,8 @@ public class ApplicationStartup implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
+		log.info("Profiles: " + serviceProperty.getProfilesActive());
+		
 		// Scan all auth and write to database.
 		List<Permission> list = getAuthResources();
 
